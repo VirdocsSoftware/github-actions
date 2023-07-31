@@ -1,0 +1,44 @@
+on:
+    workflow_call:
+      inputs:
+        cfn-template-file-1:
+          description: "The path to a CloudFormation template .yml or .yaml file to be linted."
+          required: true
+          type: string
+        cfn-template-file-2:
+          description: "(Optional) The path to another CloudFormation template .yml or .yaml file to be linted."
+          required: false
+          type: string
+          default: ""
+      secrets:
+        env-github-token:
+          description: "A valid GitHub token to be used by the action."
+          required: true
+
+jobs:
+    lint-cloudformation:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+
+          - name: Setup Cloud Formation Formatter
+            run: |
+              gh release download --repo aws-cloudformation/rain --pattern "*_linux-amd64.zip" --output "rain.zip"
+              unzip -j "rain.zip" "*/rain"
+            env:
+              GH_TOKEN: ${{ secrets.env-github-token }}
+
+          - name: Verify with Cloud Formation Formatter
+            run: |
+              ./rain fmt --verify ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}
+
+          - name: Setup Cloud Formation Linter
+            uses: scottbrenner/cfn-lint-action@v2
+
+          - name: Verify with Cloud Formation Linter
+            run: |
+              cfn-lint --version
+              echo 'Running CFN Linter on ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}'
+              cfn-lint -t ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}
