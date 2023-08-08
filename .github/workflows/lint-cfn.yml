@@ -22,21 +22,29 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.0.1'
+          echo 'lint-cfn v1.1.0'
 
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Cloud Formation Formatter
+      - name: Setup CloudFormation Formatter
         run: |
           gh release download --repo aws-cloudformation/rain --pattern "*_linux-amd64.zip" --output "rain.zip"
           unzip -j "rain.zip" "*/rain"
         env:
           GH_TOKEN: ${{ secrets.env-github-token }}
 
-      - name: Verify with Cloud Formation Formatter
+      - name: Verify with CloudFormation Formatter
         run: |
           ./rain fmt --verify ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}
+
+      - name: Advice for Addressing Action Failure - CloudFormation Formatting
+        if: failure()
+        run: |
+          echo 'Your build failed due to your CloudFormation template file(s) requiring edits to pass our required formatting rules.'
+          echo 'Please review the previous "Verify with CloudFormation Formatter" step to see which file(s) need to be formatted.'
+          echo 'You need to format the CloudFormation file(s) using the autoformatter before commiting your change.'
+          echo 'Consult the ReadMe for guidance https://github.com/VirdocsSoftware/github-actions/tree/main#cfn-formatting-rain'
 
   verify-cloudformation-linting:
     runs-on: ubuntu-latest
@@ -44,12 +52,12 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.0.1'
+          echo 'lint-cfn v1.1.0'
 
-      - name: Setup Cloud Formation Linter
+      - name: Setup CloudFormation Linter
         uses: scottbrenner/cfn-lint-action@v2
 
-      - name: Verify with Cloud Formation Linter
+      - name: Verify with CloudFormation Linter
         run: |
           cfn-lint --version
           echo 'Running CFN Linter on ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}'
@@ -59,5 +67,6 @@ jobs:
         if: failure()
         run: |
           echo 'Your build failed due to your CloudFormation template file(s) requiring edits to pass our required linting rules.'
-          echo 'Please review the previous "Verify with Cloud Formation Linter" step for more explicit failure reasoning.'
-          echo 'Consult the ReadMe for guidance '
+          echo 'Please review the previous "Verify with CloudFormation Linter" step for more explicit failure reasoning.'
+          echo 'You need to correct the linting warnings and errors before commiting your change.'
+          echo 'Consult the ReadMe for guidance https://github.com/VirdocsSoftware/github-actions/tree/main#cfn-linting-cfn-lint'
