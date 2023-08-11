@@ -54,6 +54,9 @@ jobs:
         run: |
           echo 'lint-cfn v1.1.0'
 
+      - name: Checkout
+        uses: actions/checkout@v3
+
       - name: Setup CloudFormation Linter
         uses: scottbrenner/cfn-lint-action@v2
 
