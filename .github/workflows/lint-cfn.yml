@@ -11,10 +11,10 @@ on:
         type: string
         default: ""
       cfn-lint-checks-ignored:
-        description: "(Optional) The array of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values."
+        description: "(Optional) The space delimited set of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values."
         required: false
         type: string
-        default: "[]"
+        default: ""
     secrets:
       env-github-token:
         description: "A valid GitHub token to be used by the action."
