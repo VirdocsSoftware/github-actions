@@ -10,8 +10,8 @@ on:
         required: false
         type: string
         default: ""
-      cfn-lint-checks-ignored:
-        description: "(Optional) The space delimited set of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values."
+      cfn-lint-additional-command:
+        description: "(Optional) Used to pass a space delimited set of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values. For ex: `-i W3002`"
         required: false
         type: string
         default: ""
@@ -69,7 +69,7 @@ jobs:
         run: |
           cfn-lint --version
           echo 'Running CFN Linter on ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}'
-          cfn-lint -t ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }} -i ${{ inputs.cfn-lint-checks-ignored }}
+          cfn-lint -t ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }} ${{ inputs.cfn-lint-additional-command }}
 
       - name: Advice for Addressing Action Failure - CloudFormation Linting
         if: failure()
