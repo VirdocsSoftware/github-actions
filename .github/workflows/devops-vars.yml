@@ -12,6 +12,9 @@ on:
       DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME:
         description: "The name of the current deployment environment. That is one of: dev, uat, demo, or prod. This is used to determine what AWS account to deploy into."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_DEPLOY_FEATURE_BRANCHES:
+        description: "A true/false (string) flag that can be used to enable the deployment of feature branches (if set to true)."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES }}
       DEVOPS_IS_ENV_DEV:
         description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'DEV' deployment environment."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV }}
