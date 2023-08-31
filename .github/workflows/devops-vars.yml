@@ -1,10 +1,28 @@
 on:
   workflow_call:
-    # inputs:
-    #   github-ref-name:
-    #     description: "The ref name for the current action. Example: ref/heads/develop."
-    #     required: true
-    #     type: string
+    outputs:
+      DEVOPS_ENV_NAME_DEV:
+        description: "The name of the 'dev' deployment environment"
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_DEV }}
+      DEVOPS_ENV_NAME_UAT:
+        description: "The name of the 'uat' deployment environment"
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_UAT }}
+      DEVOPS_ENV_NAME_DEMO:
+        description: "The name of the 'demo' deployment environment"
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_DEMO }}
+      DEVOPS_ENV_NAME_PROD:
+        description: "The name of the 'prod' deployment environment"
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_PROD }}
+      DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME:
+        description: "The name of the current deployment environment. That is one of: dev, uat, demo, or prod. This is used to determine what AWS account to deploy into."
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_IS_FEATURE_BRANCH:
+        description: "A true/false flag that indicates whether the current GitHub branch is a feature branch or not. It is determined to be a feature branch if the branch name is not one of: 'develop', 'uat', 'demo', 'main'."
+        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }}
+      DEVOPS_BRANCH_ENV_NAME:
+        description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of "
+        value: ${{ jobs.devops-branch-vars.outputs.DEVOPS_BRANCH_ENV_NAME }}
+
 
 jobs:
   devops-env-vars:
