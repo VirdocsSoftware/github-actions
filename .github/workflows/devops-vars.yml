@@ -1,31 +1,34 @@
 on:
   workflow_call:
     outputs:
-      DEVOPS_ENV_NAME_DEV:
-        description: "The name of the 'dev' deployment environment"
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_DEV }}
-      DEVOPS_ENV_NAME_UAT:
-        description: "The name of the 'uat' deployment environment"
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_UAT }}
-      DEVOPS_ENV_NAME_DEMO:
-        description: "The name of the 'demo' deployment environment"
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_DEMO }}
-      DEVOPS_ENV_NAME_PROD:
-        description: "The name of the 'prod' deployment environment"
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_ENV_NAME_PROD }}
+      DEVOPS_BRANCH_ENV_NAME:
+        description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of unique names."
+        value: ${{ jobs.branch-vars.outputs.DEVOPS_BRANCH_ENV_NAME }}
       DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME:
         description: "The name of the current deployment environment. That is one of: dev, uat, demo, or prod. This is used to determine what AWS account to deploy into."
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+        value: ${{ jobs.env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_ENV_NAME_DEV:
+        description: "The name of the 'dev' deployment environment"
+        value: ${{ jobs.env-vars.outputs.DEVOPS_ENV_NAME_DEV }}
+      DEVOPS_ENV_NAME_UAT:
+        description: "The name of the 'uat' deployment environment"
+        value: ${{ jobs.env-vars.outputs.DEVOPS_ENV_NAME_UAT }}
+      DEVOPS_ENV_NAME_DEMO:
+        description: "The name of the 'demo' deployment environment"
+        value: ${{ jobs.env-vars.outputs.DEVOPS_ENV_NAME_DEMO }}
+      DEVOPS_ENV_NAME_PROD:
+        description: "The name of the 'prod' deployment environment"
+        value: ${{ jobs.env-vars.outputs.DEVOPS_ENV_NAME_PROD }}
       DEVOPS_IS_FEATURE_BRANCH:
         description: "A true/false flag that indicates whether the current GitHub branch is a feature branch or not. It is determined to be a feature branch if the branch name is not one of: 'develop', 'uat', 'demo', 'main'."
-        value: ${{ jobs.devops-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }}
-      DEVOPS_BRANCH_ENV_NAME:
-        description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of "
-        value: ${{ jobs.devops-branch-vars.outputs.DEVOPS_BRANCH_ENV_NAME }}
+        value: ${{ jobs.env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }}
+      DEVOPS_JIRA_TICKET_ID:
+        description: "The JIRA Ticket ID that was found within the branch name. Only expect a value when DEVOPS_IS_FEATURE_BRANCH is true. Defaults to 'N/A' in the case one doesn't exist in the branch name or isn't a feature branch."
+        value: ${{ jobs.jira-vars.outputs.DEVOPS_JIRA_TICKET_ID }}
 
 
 jobs:
-  devops-env-vars:
+  env-vars:
     runs-on: ubuntu-latest
     outputs:
       DEVOPS_ENV_NAME_DEV: ${{ steps.define-deployment-envs.outputs.DEVOPS_ENV_NAME_DEV }}
@@ -111,9 +114,9 @@ jobs:
         run: echo "DEVOPS_IS_FEATURE_BRANCH=${{ steps.determine-deployment-env.outputs.DEVOPS_IS_FEATURE_BRANCH }}"
 
 
-  devops-jira-vars:
+  jira-vars:
     runs-on: ubuntu-latest
-    needs: [devops-env-vars]
+    needs: [env-vars]
     outputs:
       DEVOPS_JIRA_TICKET_ID: ${{ steps.extract-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}
     steps:
@@ -129,7 +132,7 @@ jobs:
         run: |
           #!/bin/bash
           # Set to "N/A" if not a feature branch
-          if [ ${{ needs.devops-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = 'false' ]; then
+          if [ ${{ needs.env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = 'false' ]; then
             echo "DEVOPS_JIRA_TICKET_ID=N/A" >> $GITHUB_OUTPUT;
           else
             refname=$GITHUB_BRANCH_NAME
@@ -149,9 +152,9 @@ jobs:
         run: echo "DEVOPS_JIRA_TICKET_ID=${{ steps.extract-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}"
 
 
-  devops-branch-vars:
+  branch-vars:
     runs-on: ubuntu-latest
-    needs: [devops-env-vars, devops-jira-vars]
+    needs: [env-vars, jira-vars]
     outputs:
       DEVOPS_BRANCH_ENV_NAME: ${{ steps.determine-branch-env-name.outputs.DEVOPS_BRANCH_ENV_NAME }}
     steps:
@@ -164,12 +167,12 @@ jobs:
         shell: bash
         run: |
           #!/bin/bash
-          if [ ${{ needs.devops-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = true ]; then
+          if [ ${{ needs.env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = true ]; then
             echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_JIRA_TICKET_ID";
-            echo "DEVOPS_BRANCH_ENV_NAME=${{ needs.devops-jira-vars.outputs.DEVOPS_JIRA_TICKET_ID }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_BRANCH_ENV_NAME=${{ needs.jira-vars.outputs.DEVOPS_JIRA_TICKET_ID }}" >> $GITHUB_OUTPUT;
           else
             echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_JIRA_TICKET_ID";
-            echo "DEVOPS_BRANCH_ENV_NAME=${{ needs.devops-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_BRANCH_ENV_NAME=${{ needs.env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}" >> $GITHUB_OUTPUT;
           fi;
 
       - name: Echo DEVOPS_BRANCH_ENV_NAME
