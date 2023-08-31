@@ -44,7 +44,7 @@ jobs:
         run: |
           echo 'devops-vars v1.3.0'
 
-      - name: Determine value of variable DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
+      - name: Determine value of DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
         id: determine-deployment-env
         env:
           GITHUB_BRANCH_NAME: ${{ github.ref_name }}
@@ -102,8 +102,8 @@ jobs:
             echo "DEVOPS_IS_ENV_DEV=true" >> $GITHUB_OUTPUT;
           fi;
 
-      - name: Echo Deployment Env Vars
-        id: echo-deployment-define-outputs
+      - name: Echo Deployment Environment Vars
+        id: echo-deployment-env-vars
         run: |
           echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ steps.determine-deployment-env.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}"
           echo "DEVOPS_IS_FEATURE_BRANCH=${{ steps.determine-deployment-env.outputs.DEVOPS_IS_FEATURE_BRANCH }}"
@@ -112,7 +112,7 @@ jobs:
           echo "DEVOPS_IS_ENV_DEMO=${{ steps.determine-deployment-env.outputs.DEVOPS_IS_ENV_DEMO }}"
           echo "DEVOPS_IS_ENV_PROD=${{ steps.determine-deployment-env.outputs.DEVOPS_IS_ENV_PROD }}"
 
-      - name: Extract JIRA Prefix to Variable DEVOPS_JIRA_TICKET_ID
+      - name: Extract JIRA Prefix to DEVOPS_JIRA_TICKET_ID
         id: extract-jira-ticket-id
         env:
           GITHUB_BRANCH_NAME: ${{ github.ref_name }}
@@ -137,9 +137,10 @@ jobs:
           fi;
 
       - name: Echo DEVOPS_JIRA_TICKET_ID
+        id: echo-jira-ticket-id
         run: echo "DEVOPS_JIRA_TICKET_ID=${{ steps.extract-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}"
 
-      - name: Determine Branch Env Name based upon DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME and DEVOPS_IS_FEATURE_BRANCH
+      - name: Determine DEVOPS_BRANCH_ENV_NAME based upon DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME and DEVOPS_IS_FEATURE_BRANCH
         id: determine-branch-env-name
         shell: bash
         run: |
@@ -153,4 +154,5 @@ jobs:
           fi;
 
       - name: Echo DEVOPS_BRANCH_ENV_NAME
+        id: echo-branch-env-name
         run: echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.determine-branch-env-name.outputs.DEVOPS_BRANCH_ENV_NAME }}"
