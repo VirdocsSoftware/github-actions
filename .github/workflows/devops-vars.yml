@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    inputs:
+      DEPLOY_FEATURE_BRANCHES:
+        description: "A true/false (boolean) flag that can be used to enable the deployment of feature branches (if set to true)."
+        type: boolean
+        default: false
     outputs:
       DEVOPS_BRANCH_ENV_NAME:
         description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of unique names."
@@ -8,19 +13,19 @@ on:
         description: "The name of the current deployment environment. That is one of: dev, uat, demo, or prod. This is used to determine what AWS account to deploy into."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
       DEVOPS_IS_ENV_DEV:
-        description: "A true/false flag that indicates whether the current GitHub branch will target the 'DEV' deployment environment."
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'DEV' deployment environment."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV }}
       DEVOPS_IS_ENV_UAT:
-        description: "A true/false flag that indicates whether the current GitHub branch will target the 'UAT' deployment environment."
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'UAT' deployment environment."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT }}
       DEVOPS_IS_ENV_DEMO:
-        description: "A true/false flag that indicates whether the current GitHub branch will target the 'DEMO' deployment environment."
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'DEMO' deployment environment."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO }}
       DEVOPS_IS_ENV_PROD:
-        description: "A true/false flag that indicates whether the current GitHub branch will target the 'PROD' deployment environment."
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'PROD' deployment environment."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD }}
       DEVOPS_IS_FEATURE_BRANCH:
-        description: "A true/false flag that indicates whether the current GitHub branch is a feature branch or not. It is determined to be a feature branch if the branch name is not one of: 'develop', 'uat', 'demo', 'main'."
+        description: "A true/false (string) flag that indicates whether the current GitHub branch is a feature branch or not. It is determined to be a feature branch if the branch name is not one of: 'develop', 'uat', 'demo', 'main'."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH }}
       DEVOPS_JIRA_TICKET_ID:
         description: "The JIRA Ticket ID that was found within the branch name. Only expect a value when DEVOPS_IS_FEATURE_BRANCH is true. Defaults to 'N/A' in the case one doesn't exist in the branch name or isn't a feature branch."
@@ -33,6 +38,7 @@ jobs:
     outputs:
       DEVOPS_BRANCH_ENV_NAME: ${{ steps.determine-branch-env-name.outputs.DEVOPS_BRANCH_ENV_NAME }}
       DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME: ${{ steps.determine-deployment-env.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_DEPLOY_FEATURE_BRANCHES: ${{ steps.determine-deployment-env.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES }}
       DEVOPS_IS_ENV_DEV: ${{ steps.determine-deployment-env.outputs.DEVOPS_IS_ENV_DEV }}
       DEVOPS_IS_ENV_UAT: ${{ steps.determine-deployment-env.outputs.DEVOPS_IS_ENV_UAT }}
       DEVOPS_IS_ENV_DEMO: ${{ steps.determine-deployment-env.outputs.DEVOPS_IS_ENV_DEMO }}
@@ -57,6 +63,9 @@ jobs:
           #!/bin/bash
           refname=$GITHUB_BRANCH_NAME
           echo "Branch Ref is ${GITHUB_BRANCH_NAME}"
+
+          # Set the variable that was passed into this workflows
+          echo "DEVOPS_DEPLOY_FEATURE_BRANCHES=${{ inputs.DEPLOY_FEATURE_BRANCHES }}" >> $GITHUB_OUTPUT;
 
           # These are the special branch names that indicate the environment we are deploying to.
           reDev=${BRANCH_NAME_DEV}
