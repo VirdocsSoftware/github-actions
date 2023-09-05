@@ -141,7 +141,9 @@ jobs:
             echo "Checking if branch name contains a JIRA issue (format MID-1234, AN-1 or similar)"
             if [[ $refname =~ $re ]]; then
               echo "JIRA Ticket ID found within ${refname}";
-              echo "DEVOPS_JIRA_TICKET_ID=$(echo ${BASH_REMATCH[0]})" >> $GITHUB_OUTPUT;
+              DEVOPS_JIRA_TICKET_ID_POSSIBLY_UPPERCASE=${BASH_REMATCH[0]}
+              DEVOPS_JIRA_TICKET_ID_LOWERCASE=${DEVOPS_JIRA_TICKET_ID_POSSIBLY_UPPERCASE,,}
+              echo "DEVOPS_JIRA_TICKET_ID=$(echo ${DEVOPS_JIRA_TICKET_ID_LOWERCASE})" >> $GITHUB_OUTPUT;
             else
               echo "Malformed Branch Name: ${refname} does not contain a JIRA Ticket ID and is not a known env specific branch.";
               exit 1;
