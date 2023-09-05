@@ -51,7 +51,7 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'devops-vars v1.3.0'
+          echo 'devops-vars v1.2.0'
 
       - name: Determine value of DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
         id: set-deployment-env-vars
