@@ -1,0 +1,172 @@
+on:
+  workflow_call:
+    inputs:
+      DEPLOY_FEATURE_BRANCHES:
+        description: "A true/false (boolean) flag that can be used to enable the deployment of feature branches (if set to true)."
+        type: boolean
+        default: false
+    outputs:
+      DEVOPS_BRANCH_ENV_NAME:
+        description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of unique names."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_BRANCH_ENV_NAME }}
+      DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME:
+        description: "The name of the current deployment environment. That is one of: dev, uat, demo, or prod. This is used to determine what AWS account to deploy into."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_DEPLOY_FEATURE_BRANCHES:
+        description: "A true/false (string) flag that can be used to enable the deployment of feature branches (if set to true)."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES }}
+      DEVOPS_IS_ENV_DEV:
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'DEV' deployment environment."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV }}
+      DEVOPS_IS_ENV_UAT:
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'UAT' deployment environment."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT }}
+      DEVOPS_IS_ENV_DEMO:
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'DEMO' deployment environment."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO }}
+      DEVOPS_IS_ENV_PROD:
+        description: "A true/false (string) flag that indicates whether the current GitHub branch will target the 'PROD' deployment environment."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD }}
+      DEVOPS_IS_FEATURE_BRANCH:
+        description: "A true/false (string) flag that indicates whether the current GitHub branch is a feature branch or not. It is determined to be a feature branch if the branch name is not one of: 'develop', 'uat', 'demo', 'main'."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH }}
+      DEVOPS_JIRA_TICKET_ID:
+        description: "The JIRA Ticket ID that was found within the branch name. Only expect a value when DEVOPS_IS_FEATURE_BRANCH is true. Defaults to 'N/A' in the case one doesn't exist in the branch name or isn't a feature branch."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_JIRA_TICKET_ID }}
+
+
+jobs:
+  define-outputs:
+    runs-on: ubuntu-latest
+    outputs:
+      DEVOPS_BRANCH_ENV_NAME: ${{ steps.set-branch-env-name.outputs.DEVOPS_BRANCH_ENV_NAME }}
+      DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      DEVOPS_DEPLOY_FEATURE_BRANCHES: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES }}
+      DEVOPS_IS_ENV_DEV: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_DEV }}
+      DEVOPS_IS_ENV_UAT: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_UAT }}
+      DEVOPS_IS_ENV_DEMO: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_DEMO }}
+      DEVOPS_IS_ENV_PROD: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_PROD }}
+      DEVOPS_IS_FEATURE_BRANCH: ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }}
+      DEVOPS_JIRA_TICKET_ID: ${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}
+    steps:
+      - name: Echo Version
+        run: |
+          echo 'devops-vars v1.2.0'
+
+      - name: Determine value of DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
+        id: set-deployment-env-vars
+        env:
+          GITHUB_BRANCH_NAME: ${{ github.ref_name }}
+          BRANCH_NAME_DEV: ${{ vars.DEVOPS_BRANCH_NAME_DEV }}
+          BRANCH_NAME_UAT: ${{ vars.DEVOPS_BRANCH_NAME_UAT }}
+          BRANCH_NAME_DEMO: ${{ vars.DEVOPS_BRANCH_NAME_DEMO }}
+          BRANCH_NAME_PROD: ${{ vars.DEVOPS_BRANCH_NAME_PROD }}
+        shell: bash
+        run: |
+          #!/bin/bash
+          refname=$GITHUB_BRANCH_NAME
+          echo "Branch Ref is ${GITHUB_BRANCH_NAME}"
+
+          # Set the variable that was passed into this workflows
+          echo "DEVOPS_DEPLOY_FEATURE_BRANCHES=${{ inputs.DEPLOY_FEATURE_BRANCHES }}" >> $GITHUB_OUTPUT;
+
+          # These are the special branch names that indicate the environment we are deploying to.
+          reDev=${BRANCH_NAME_DEV}
+          echo "Branch Name Dev = ${BRANCH_NAME_DEV}"
+          reUat=${BRANCH_NAME_UAT}
+          echo "Branch Name UAT = ${BRANCH_NAME_UAT}"
+          reDemo=${BRANCH_NAME_DEMO}
+          echo "Branch Name Demo = ${BRANCH_NAME_DEMO}"
+          reProd=${BRANCH_NAME_PROD}
+          echo "Branch Name Prod = ${BRANCH_NAME_PROD}"
+
+          echo "Setting Feature and Env Branch Flags to be false by default"
+          echo "DEVOPS_IS_FEATURE_BRANCH=false" >> $GITHUB_OUTPUT;
+          echo "DEVOPS_IS_ENV_DEV=false" >> $GITHUB_OUTPUT;
+          echo "DEVOPS_IS_ENV_UAT=false" >> $GITHUB_OUTPUT;
+          echo "DEVOPS_IS_ENV_DEMO=false" >> $GITHUB_OUTPUT;
+          echo "DEVOPS_IS_ENV_PROD=false" >> $GITHUB_OUTPUT;
+
+          # Logic for Checking Deployment Env
+          echo "Checking if branch name indicates a deployment to one of the four environments (dev, uat, demo, or prod)"
+          if [[ $refname =~ $reProd ]]; then
+            echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to ${{ vars.DEVOPS_ENV_NAME_PROD }}";
+            echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_PROD }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_IS_ENV_PROD=true" >> $GITHUB_OUTPUT;
+          elif [[ $refname =~ $reUat ]]; then
+            echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_UAT }}";
+            echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_UAT }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_IS_ENV_UAT=true" >> $GITHUB_OUTPUT;
+          elif [[ $refname =~ $reDemo ]]; then
+            echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEMO }}";
+            echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEMO }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_IS_ENV_DEMO=true" >> $GITHUB_OUTPUT;
+          elif [[ $refname =~ $reDev ]]; then
+            echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEV }}";
+            echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEV }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_IS_ENV_DEV=true" >> $GITHUB_OUTPUT;
+          else
+            # In case none of the above occurs
+            echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEV }}";
+            echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEV }}" >> $GITHUB_OUTPUT;
+            echo "Setting DEVOPS_IS_FEATURE_BRANCH to 'true' becuase this is not one of the four named environment branches.";
+            echo "DEVOPS_IS_FEATURE_BRANCH=true" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_IS_ENV_DEV=true" >> $GITHUB_OUTPUT;
+          fi;
+
+      - name: Echo Deployment Environment Vars
+        id: echo-deployment-env-vars
+        run: |
+          echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ steps.set-deployment-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}"
+          echo "DEVOPS_IS_FEATURE_BRANCH=${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }}"
+          echo "DEVOPS_IS_ENV_DEV=${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_DEV }}"
+          echo "DEVOPS_IS_ENV_UAT=${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_UAT }}"
+          echo "DEVOPS_IS_ENV_DEMO=${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_DEMO }}"
+          echo "DEVOPS_IS_ENV_PROD=${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_ENV_PROD }}"
+
+      - name: Determine value of DEVOPS_JIRA_TICKET_ID
+        id: set-jira-ticket-id
+        env:
+          GITHUB_BRANCH_NAME: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          #!/bin/bash
+          # Set to "N/A" if not a feature branch
+          if [ ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = 'false' ]; then
+            echo "DEVOPS_JIRA_TICKET_ID=N/A" >> $GITHUB_OUTPUT;
+          else
+            refname=$GITHUB_BRANCH_NAME
+            re="[A-Z]+-[0-9]+"
+
+            echo "Checking if branch name contains a JIRA issue (format MID-1234, AN-1 or similar)"
+            if [[ $refname =~ $re ]]; then
+              echo "JIRA Ticket ID found within ${refname}";
+              DEVOPS_JIRA_TICKET_ID_POSSIBLY_UPPERCASE=${BASH_REMATCH[0]}
+              DEVOPS_JIRA_TICKET_ID_LOWERCASE=${DEVOPS_JIRA_TICKET_ID_POSSIBLY_UPPERCASE,,}
+              echo "DEVOPS_JIRA_TICKET_ID=$(echo ${DEVOPS_JIRA_TICKET_ID_LOWERCASE})" >> $GITHUB_OUTPUT;
+            else
+              echo "Malformed Branch Name: ${refname} does not contain a JIRA Ticket ID and is not a known env specific branch.";
+              exit 1;
+            fi
+          fi;
+
+      - name: Echo DEVOPS_JIRA_TICKET_ID
+        id: echo-jira-ticket-id
+        run: echo "DEVOPS_JIRA_TICKET_ID=${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}"
+
+      - name: Determine DEVOPS_BRANCH_ENV_NAME based upon DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME and DEVOPS_IS_FEATURE_BRANCH
+        id: set-branch-env-name
+        shell: bash
+        run: |
+          #!/bin/bash
+          if [ ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = true ]; then
+            echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_JIRA_TICKET_ID";
+            echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}" >> $GITHUB_OUTPUT;
+          else
+            echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME";
+            echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-deployment-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}" >> $GITHUB_OUTPUT;
+          fi;
+
+      - name: Echo DEVOPS_BRANCH_ENV_NAME
+        id: echo-branch-env-name
+        run: echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-branch-env-name.outputs.DEVOPS_BRANCH_ENV_NAME }}"
