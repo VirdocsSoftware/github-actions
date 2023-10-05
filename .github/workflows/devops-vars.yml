@@ -2,7 +2,7 @@ on:
   workflow_call:
     inputs:
       DEPLOY_FEATURE_BRANCHES:
-        description: "A true/false (boolean) flag that can be used to enable the deployment of feature branches (if set to true)."
+        description: "A boolean flag used to enable the deployment of CloudFormation for feature branches. Will deploy if true."
         type: boolean
         default: false
     outputs:
@@ -33,6 +33,15 @@ on:
       DEVOPS_JIRA_TICKET_ID:
         description: "The JIRA Ticket ID that was found within the branch name. Only expect a value when DEVOPS_IS_FEATURE_BRANCH is true. Defaults to 'N/A' in the case one doesn't exist in the branch name or isn't a feature branch."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_JIRA_TICKET_ID }}
+      DEVOPS_TRIGGER_DB_MIGRATIONS_NON_PROD:
+        description: "This flag determines whether or not the Non-Prod Database Migrations will actually occur (true) or if the conditions have not been met for attempting DB migrations (false)."
+        value: ${{ (jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV == 'true') && (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'false') }}
+      DEVOPS_TRIGGER_DB_MIGRATIONS_PROD:
+        description: "This flag determines whether or not the Prod Database Migrations will actually occur (true) or if the conditions have not been met for attempting DB migrations (false)."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD == 'true' }}
+      DEVOPS_TRIGGER_DEPLOYMENT:
+        description: "This flag determines whether or not the CloudFormation deployment will actually occur (true) or if the conditions have not been met for deployment (false)."
+        value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV == 'true' && (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'false' || (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'true' && jobs.define-outputs.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES == 'true')) }}
 
 
 jobs:
@@ -51,7 +60,7 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'devops-vars v1.2.0'
+          echo 'devops-vars v1.3.0'
 
       - name: Determine value of DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
         id: set-deployment-env-vars
