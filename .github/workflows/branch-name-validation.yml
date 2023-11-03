@@ -1,0 +1,40 @@
+name: Branch Name Validation
+
+on:
+    pull_request:
+        types:
+            - opened
+            - synchronize
+
+jobs:
+    branch-name-check:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Check Branch Name
+              id: branch-check
+              uses: actions/checkout@v2
+
+            - name: Validate Branch Name
+              id: branch-validation
+              shell: bash
+              run: |
+                # Define the Jira ticket pattern regular expression
+                # (case insensitive, starts with alpha characters followed by -, followed by digits and then anything else)
+                # Match examples: MID-123-feature-branch, MID-123
+                # Not a match examples: fix-MID-123, feature-branch-with-long-name, featureBranch
+                JIRA_PATTERN="^(?i)[A-Z]+-\d+.*$"
+
+                BRANCH_NAME=$(echo "${{ github.ref }}") | sed 's/refs\/heads\///')
+
+                if [[ ! $BRANCH_NAME =~ $JIRA_PATTERN ]]; then
+                    echo "Branch name: $BRANCH_NAME,  does not match the required JIRA pattern: $JIRA_PATTERN"
+                    echo "::error::Branch name does not match the required JIRA pattern."
+                else
+                    echo "Branch name matches required JIRA pattern."
+                fi
+
+            - name: Set Branch Name Validation Status
+              if: steps.branch-validation.outcome == 'success'
+              run: echo "Branch name matches required JIRA pattern."
+
