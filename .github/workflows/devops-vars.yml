@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'devops-vars v1.3.0'
+          echo 'devops-vars v1.3.1'
 
       - name: Determine value of DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME
         id: set-deployment-env-vars
@@ -98,19 +98,19 @@ jobs:
 
           # Logic for Checking Deployment Env
           echo "Checking if branch name indicates a deployment to one of the four environments (dev, uat, demo, or prod)"
-          if [[ $refname =~ $reProd ]]; then
+          if [[ $refname = $reProd ]]; then
             echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to ${{ vars.DEVOPS_ENV_NAME_PROD }}";
             echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_PROD }}" >> $GITHUB_OUTPUT;
             echo "DEVOPS_IS_ENV_PROD=true" >> $GITHUB_OUTPUT;
-          elif [[ $refname =~ $reUat ]]; then
+          elif [[ $refname = $reUat ]]; then
             echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_UAT }}";
             echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_UAT }}" >> $GITHUB_OUTPUT;
             echo "DEVOPS_IS_ENV_UAT=true" >> $GITHUB_OUTPUT;
-          elif [[ $refname =~ $reDemo ]]; then
+          elif [[ $refname = $reDemo ]]; then
             echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEMO }}";
             echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEMO }}" >> $GITHUB_OUTPUT;
             echo "DEVOPS_IS_ENV_DEMO=true" >> $GITHUB_OUTPUT;
-          elif [[ $refname =~ $reDev ]]; then
+          elif [[ $refname = $reDev ]]; then
             echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEV }}";
             echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEV }}" >> $GITHUB_OUTPUT;
             echo "DEVOPS_IS_ENV_DEV=true" >> $GITHUB_OUTPUT;
