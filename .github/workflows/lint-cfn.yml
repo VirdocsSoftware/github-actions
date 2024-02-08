@@ -27,10 +27,10 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.2.0'
+          echo 'lint-cfn v1.3.1'
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup CloudFormation Formatter
         run: |
@@ -57,10 +57,10 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.2.0'
+          echo 'lint-cfn v1.3.1'
 
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup CloudFormation Linter
         uses: scottbrenner/cfn-lint-action@v2
