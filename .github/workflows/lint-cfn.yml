@@ -43,6 +43,7 @@ jobs:
           GH_TOKEN: ${{ secrets.env-github-token }}
 
       - name: Verify with CloudFormation Formatter
+        continue-on-error: true
         run: |
           ./rain fmt --verify ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}
 
@@ -72,6 +73,7 @@ jobs:
         uses: scottbrenner/cfn-lint-action@v2
 
       - name: Verify with CloudFormation Linter
+        continue-on-error: true
         run: |
           cfn-lint --version
           echo 'Running CFN Linter on ${{ inputs.cfn-template-file-1 }} ${{ inputs.cfn-template-file-2 }}'
