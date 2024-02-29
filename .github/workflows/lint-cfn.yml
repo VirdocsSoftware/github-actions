@@ -24,6 +24,9 @@ jobs:
   verify-cloudformation-formatting:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+
     steps:
       - name: Echo Version
         run: |
@@ -53,6 +56,9 @@ jobs:
 
   verify-cloudformation-linting:
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
 
     steps:
       - name: Echo Version
