@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.3.1'
+          echo 'lint-cfn v1.4.0'
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,7 +63,7 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.3.1'
+          echo 'lint-cfn v1.4.0'
 
       - name: Checkout
         uses: actions/checkout@v4
