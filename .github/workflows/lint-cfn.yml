@@ -30,14 +30,14 @@ jobs:
     steps:
       - name: Echo Version
         run: |
-          echo 'lint-cfn v1.4.0'
+          echo 'lint-cfn v1.4.1'
 
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup CloudFormation Formatter
         run: |
-          gh release download --repo aws-cloudformation/rain --pattern "*_linux-amd64.zip" --output "rain.zip"
+          gh release download --repo aws-cloudformation/rain --pattern "v1.7.5_linux-amd64.zip" --output "rain.zip"
           unzip -j "rain.zip" "*/rain"
         env:
           GH_TOKEN: ${{ secrets.env-github-token }}
