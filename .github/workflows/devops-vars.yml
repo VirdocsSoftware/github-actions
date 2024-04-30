@@ -43,7 +43,6 @@ on:
         description: "This flag determines whether or not the CloudFormation deployment will actually occur (true) or if the conditions have not been met for deployment (false)."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV == 'true' && (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'false' || (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'true' && jobs.define-outputs.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES == 'true')) }}
 
-
 jobs:
   define-outputs:
     runs-on: ubuntu-latest
@@ -155,7 +154,6 @@ jobs:
               echo "DEVOPS_JIRA_TICKET_ID=$(echo ${DEVOPS_JIRA_TICKET_ID_LOWERCASE})" >> $GITHUB_OUTPUT;
             else
               echo "Malformed Branch Name: ${refname} does not contain a JIRA Ticket ID and is not a known env specific branch.";
-              exit 1;
             fi
           fi;
 
