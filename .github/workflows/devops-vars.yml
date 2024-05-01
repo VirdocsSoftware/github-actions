@@ -43,7 +43,6 @@ on:
         description: "This flag determines whether or not the CloudFormation deployment will actually occur (true) or if the conditions have not been met for deployment (false)."
         value: ${{ jobs.define-outputs.outputs.DEVOPS_IS_ENV_UAT == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEMO == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_PROD == 'true' || jobs.define-outputs.outputs.DEVOPS_IS_ENV_DEV == 'true' && (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'false' || (jobs.define-outputs.outputs.DEVOPS_IS_FEATURE_BRANCH == 'true' && jobs.define-outputs.outputs.DEVOPS_DEPLOY_FEATURE_BRANCHES == 'true')) }}
 
-
 jobs:
   define-outputs:
     runs-on: ubuntu-latest
@@ -154,8 +153,8 @@ jobs:
               DEVOPS_JIRA_TICKET_ID_LOWERCASE=${DEVOPS_JIRA_TICKET_ID_POSSIBLY_UPPERCASE,,}
               echo "DEVOPS_JIRA_TICKET_ID=$(echo ${DEVOPS_JIRA_TICKET_ID_LOWERCASE})" >> $GITHUB_OUTPUT;
             else
-              echo "Malformed Branch Name: ${refname} does not contain a JIRA Ticket ID and is not a known env specific branch.";
-              exit 1;
+              echo "Branch ${refname} does not contain a JIRA Ticket ID ";
+              echo "DEVOPS_JIRA_TICKET_ID=N/A" >> $GITHUB_OUTPUT;
             fi
           fi;
 
@@ -169,8 +168,13 @@ jobs:
         run: |
           #!/bin/bash
           if [ ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = true ]; then
-            echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_JIRA_TICKET_ID";
-            echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}" >> $GITHUB_OUTPUT;
+            if [ ${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }} != 'N/A' ]; then
+              echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_JIRA_TICKET_ID";
+              echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }}" >> $GITHUB_OUTPUT;
+            else
+              echo "Setting DEVOPS_ENV_NAME to be equal to GITHUB_REF_NAME";
+              echo "DEVOPS_BRANCH_ENV_NAME=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT;
+            fi;
           else
             echo "Setting DEVOPS_ENV_NAME to be equal to DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME";
             echo "DEVOPS_BRANCH_ENV_NAME=${{ steps.set-deployment-env-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}" >> $GITHUB_OUTPUT;
