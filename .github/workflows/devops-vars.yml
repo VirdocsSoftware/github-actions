@@ -170,7 +170,7 @@ jobs:
           # First, check if this is a PR. If so, set the branch name to be the PR number
           if [ ${{ github.event_name }} = 'pull_request' ]; then
             echo "Setting DEVOPS_BRANCH_ENV_NAME to be equal to the pull request number";
-            echo "DEVOPS_BRANCH_ENV_NAME=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT;
+            echo "DEVOPS_BRANCH_ENV_NAME=${{ github.event.number }}" >> $GITHUB_OUTPUT;
           else
             if [ ${{ steps.set-deployment-env-vars.outputs.DEVOPS_IS_FEATURE_BRANCH }} = true ]; then
               if [ ${{ steps.set-jira-ticket-id.outputs.DEVOPS_JIRA_TICKET_ID }} != 'N/A' ]; then
