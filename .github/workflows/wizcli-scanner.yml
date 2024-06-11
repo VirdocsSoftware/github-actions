@@ -1,14 +1,23 @@
 name: 'wizcli-scanner'
 on:
   workflow_call:
+    secrets:
+      WIZ_CLIENT_ID:
+        description: "Wizcli Client ID"
+        required: true
+      WIZ_CLIENT_SECRET:
+        description: "Wizcli Client Secret"
+        required: true
 
 jobs:
   wizcli-scan:
     name: 'Wizcli Scan'
     runs-on: ubuntu-latest
     env:
-      SCAN_PATH: "." # Set the relative path in the repo to scan
+      SCAN_PATH: "."
       TIMEOUT: 60s
+      WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+      WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
 
     defaults:
       run:
@@ -22,9 +31,6 @@ jobs:
       run: curl -o wizcli https://wizcli.app.wiz.io/latest/wizcli && chmod +x wizcli
 
     - name: Authenticate to Wiz
-      env:
-        WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
-        WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
       run: ./wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
 
     - name: Run wiz CLI IaC scan
