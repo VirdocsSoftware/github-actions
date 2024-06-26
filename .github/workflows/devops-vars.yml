@@ -5,6 +5,14 @@ on:
         description: "A boolean flag used to enable the deployment of CloudFormation for feature branches. Will deploy if true."
         type: boolean
         default: false
+      DEVOPS_BRANCH_NAME_DEV:
+        description: "The name of the branch that indicates a deployment to the 'DEV' environment."
+        type: string
+        default: 'develop'
+      DEVOPS_BRANCH_NAME_UAT:
+        description: "The name of the branch that indicates a deployment to the 'UAT' environment."
+        type: string
+        default: 'uat'
     outputs:
       DEVOPS_BRANCH_ENV_NAME:
         description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of unique names."
