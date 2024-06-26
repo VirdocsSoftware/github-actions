@@ -117,7 +117,7 @@ jobs:
             # In case none of the above occurs
             echo "Setting DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME to be ${{ vars.DEVOPS_ENV_NAME_DEV }}";
             echo "DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME=${{ vars.DEVOPS_ENV_NAME_DEV }}" >> $GITHUB_OUTPUT;
-            echo "Setting DEVOPS_IS_FEATURE_BRANCH to 'true' becuase this is not one of the four named environment branches.";
+            echo "Setting DEVOPS_IS_FEATURE_BRANCH to 'true' because this is not one of the four named environment branches.";
             echo "DEVOPS_IS_FEATURE_BRANCH=true" >> $GITHUB_OUTPUT;
             echo "DEVOPS_IS_ENV_DEV=true" >> $GITHUB_OUTPUT;
           fi;
