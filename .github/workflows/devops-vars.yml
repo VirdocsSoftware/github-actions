@@ -5,14 +5,6 @@ on:
         description: "A boolean flag used to enable the deployment of CloudFormation for feature branches. Will deploy if true."
         type: boolean
         default: false
-      DEVOPS_BRANCH_NAME_DEV:
-        description: "The name of the branch that indicates a deployment to the 'DEV' environment."
-        type: string
-        default: 'develop'
-      DEVOPS_BRANCH_NAME_UAT:
-        description: "The name of the branch that indicates a deployment to the 'UAT' environment."
-        type: string
-        default: 'uat'
     outputs:
       DEVOPS_BRANCH_ENV_NAME:
         description: "A value to append to CloudFormation stack names and AWS resource names for the purpose of unique names."
@@ -73,8 +65,8 @@ jobs:
         id: set-deployment-env-vars
         env:
           GITHUB_BRANCH_NAME: ${{ github.ref_name }}
-          BRANCH_NAME_DEV: ${{ vars.DEVOPS_BRANCH_NAME_DEV }}
-          BRANCH_NAME_UAT: ${{ vars.DEVOPS_BRANCH_NAME_UAT }}
+          BRANCH_NAME_DEV: ${{ vars.DEVOPS_BRANCH_NAME_DEV || 'develop' }}
+          BRANCH_NAME_UAT: ${{ vars.DEVOPS_BRANCH_NAME_UAT || 'uat' }}
           BRANCH_NAME_DEMO: ${{ vars.DEVOPS_BRANCH_NAME_DEMO }}
           BRANCH_NAME_PROD: ${{ vars.DEVOPS_BRANCH_NAME_PROD }}
         shell: bash
