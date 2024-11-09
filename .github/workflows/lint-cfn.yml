@@ -1,17 +1,17 @@
 on:
   workflow_call:
-          inputs:
-            cfn-template-file-1:
-              description: "The path to a CloudFormation template .yml or .yaml file to be linted."
-              required: true
-              type: string
-            cfn-template-file-2:
-              description: "(Optional) The path to another CloudFormation template .yml or .yaml file to be linted."
-              required: false
-              type: string
-              default: ""
-            cfn-lint-additional-command:
-              description: "(Optional) Used to pass a space delimited set of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values. For ex: `-i W3002`"
+    inputs:
+      cfn-template-file-1:
+        description: "The path to a CloudFormation template .yml or .yaml file to be linted."
+        required: true
+        type: string
+      cfn-template-file-2:
+        description: "(Optional) The path to another CloudFormation template .yml or .yaml file to be linted."
+        required: false
+        type: string
+        default: ""
+      cfn-lint-additional-command:
+        description: "(Optional) Used to pass a space delimited set of rules to ignore. cfn-lint will only check rules whose ID do not match or prefix these values. For ex: `-i W3002`"
         required: false
         type: string
         default: ""
