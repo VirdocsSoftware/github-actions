@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Tag Jira Release
-        uses: ./
+        uses: VirdocsSoftware/github-actions/.github/actions/tag-jira-release@main
         with:
           target-branch: 'origin/main'
           jira-token: ${{ secrets.JIRA_TOKEN }}
