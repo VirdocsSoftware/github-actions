@@ -8,7 +8,7 @@ inputs:
     description: 'The prompt to send to Gemini'
     required: true
 outputs:
-  response-text:
+  response:
     description: 'The text response from Gemini'
 
 runs:
@@ -29,5 +29,5 @@ runs:
       run: |
         response="$(node invoke_gemini.js)"
         echo "$response"
-        echo "response-text=$response" >> $GITHUB_ENV
+        echo "response=$response" >> $GITHUB_ENV
       working-directory: ${{ github.action_path }}
