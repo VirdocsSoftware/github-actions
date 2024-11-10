@@ -29,5 +29,5 @@ runs:
       run: |
         response="$(node invoke_gemini.js)"
         echo "$response"
-        echo "response=$response" >> $GITHUB_ENV
+        echo "::set-output name=response::$response"
       working-directory: ${{ github.action_path }}
