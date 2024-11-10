@@ -27,5 +27,7 @@ runs:
         API_KEY: ${{ inputs.gemini-api-key }}
         LLM_PROMPT: ${{ inputs.prompt }}
       run: |
-        node invoke_gemini.js
+        response="$(node invoke_gemini.js)"
+        echo "$response"
+        echo "response-text=$response" >> $GITHUB_ENV
       working-directory: ${{ github.action_path }}
