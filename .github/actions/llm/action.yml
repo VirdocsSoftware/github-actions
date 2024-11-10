@@ -31,5 +31,8 @@ runs:
       run: |
         response="$(node invoke_gemini.js)"
         echo "$response"
-        echo "response=$response" >> $GITHUB_OUTPUT
+        # Use a delimiter to properly handle the multi-line value
+        echo "response<<EOF" >> $GITHUB_OUTPUT
+        echo "$response" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
       working-directory: ${{ github.action_path }}
