@@ -1,0 +1,30 @@
+name: Gemini Text Generation
+description: Send a prompt to Google Gemini and retrieve the text response
+inputs:
+  gemini-api-key:
+    description: 'The API key for the Gemini API'
+    required: true
+  prompt:
+    description: 'The prompt to send to Gemini'
+    required: true
+outputs:
+  response-text:
+    description: 'The text response from Gemini'
+
+runs:
+  using: 'composite'
+  steps:
+    # Install necessary npm packages
+    - name: Install dependencies
+      shell: bash
+      run: |
+        npm install
+    # Execute the script to send the prompt to Gemini and retrieve the response
+    - name: Execute script
+      shell: bash
+      env:
+        API_KEY: ${{ inputs.gemini-api-key }}
+        LLM_PROMPT: ${{ inputs.prompt }}
+      run: |
+        response=$(node invoke_gemini.js)
+        echo "response-text=$response" >> $GITHUB_OUTPUT
