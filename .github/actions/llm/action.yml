@@ -10,6 +10,7 @@ inputs:
 outputs:
   response:
     description: 'The text response from Gemini'
+    value: ${{ steps.generate_response.outputs.response }}
 
 runs:
   using: 'composite'
@@ -22,6 +23,7 @@ runs:
     # Execute the script to send the prompt to Gemini and retrieve the response
       working-directory: ${{ github.action_path }}
     - name: Execute script
+      id: generate_response
       shell: bash
       env:
         API_KEY: ${{ inputs.gemini-api-key }}
