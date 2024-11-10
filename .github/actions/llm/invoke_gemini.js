@@ -4,4 +4,4 @@ const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 const prompt = process.env.LLM_PROMPT;
 
 const result = await model.generateContent(prompt);
-console.log(JSON.stringify(result.response.text()));
+console.log(result.response.text());
