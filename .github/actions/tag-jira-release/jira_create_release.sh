@@ -59,11 +59,15 @@ function next_release_date() {
 function create_payload() {
   local release="$1"
   local description="$2"
+  
+  # Escape new lines and double quotes for JSON compatibility
+  local escaped_description=$(echo "$description" | sed ':a;N;$!ba;s/\n/ /g' | sed 's/"/\\"/g')
+  
   local projectId="$3"
   local payload='{
     "archived": false,
     "name": "'$release'",
-    "description": "'$description'",
+    "description": "'$escaped_description'",
     "projectId": '$projectId',
     "released": false,
     "releaseDate": "'$(next_release_date "$RELEASE_DAY")'"
