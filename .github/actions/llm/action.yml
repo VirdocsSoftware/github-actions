@@ -20,6 +20,7 @@ runs:
       run: |
         npm install
     # Execute the script to send the prompt to Gemini and retrieve the response
+      working-directory: ${{ github.action_path }}
     - name: Execute script
       shell: bash
       env:
@@ -28,3 +29,4 @@ runs:
       run: |
         response=$(node invoke_gemini.js)
         echo "response-text=$response" >> $GITHUB_OUTPUT
+      working-directory: ${{ github.action_path }}
