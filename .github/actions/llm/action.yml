@@ -1,0 +1,38 @@
+name: Gemini Text Generation
+description: Send a prompt to Google Gemini and retrieve the text response
+inputs:
+  gemini-api-key:
+    description: 'The API key for the Gemini API'
+    required: true
+  prompt:
+    description: 'The prompt to send to Gemini'
+    required: true
+outputs:
+  response:
+    description: 'The text response from Gemini'
+    value: ${{ steps.generate_response.outputs.response }}
+
+runs:
+  using: 'composite'
+  steps:
+    # Install necessary npm packages
+    - name: Install dependencies
+      shell: bash
+      run: |
+        npm install
+      working-directory: ${{ github.action_path }}
+    # Execute the script to send the prompt to Gemini and retrieve the response
+    - name: Execute script
+      id: generate_response
+      shell: bash
+      env:
+        API_KEY: ${{ inputs.gemini-api-key }}
+        LLM_PROMPT: ${{ inputs.prompt }}
+      run: |
+        response="$(node invoke_gemini.js)"
+        echo "$response"
+        # Use a delimiter to properly handle the multi-line value
+        echo "response<<EOF" >> $GITHUB_OUTPUT
+        echo "$response" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+      working-directory: ${{ github.action_path }}
