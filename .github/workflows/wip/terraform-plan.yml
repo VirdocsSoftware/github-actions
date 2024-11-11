@@ -1,0 +1,62 @@
+name: Terraform Plan for Dev / Test / Prod
+
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - '*'  # This triggers the workflow for any tag push
+  workflow_dispatch: # No need for inputs, just select a branch to run on
+
+jobs:
+  devops-vars:
+    uses: VirdocsSoftware/github-actions/.github/workflows/devops-vars.yml@v2
+
+  terraform-plan:
+    runs-on: ubuntu-latest
+    name: Terraform Plan
+    needs: [devops-vars]
+    env:
+      ENV_NAME: ${{ needs.devops-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}
+      TERRAFORM_DIRECTORY: ./infrastructure/redshelf-${{ needs.devops-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}/${{ needs.devops-vars.outputs.DEVOPS_CURRENT_DEPLOYMENT_ENV_NAME }}/data-ingestion-api/terraform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials for Deployment
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', env.ENV_NAME)] }}
+        aws-secret-access-key: ${{ secrets[format('{0}_AWS_SECRET_ACCESS_KEY', env.ENV_NAME)] }}
+        aws-region: ${{ vars[format('{0}_AWS_REGION', env.ENV_NAME)] }}
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.3
+
+    - name: Terraform Validate
+      id: check_valid
+      run: make validate_${{ env.ENV_NAME }}
+      continue-on-error: true
+
+    - name: Terraform fmt
+      id: check_fmt
+      run: make fmt_check
+      continue-on-error: true
+
+    - name: Run Terraform Plan
+      run: make plan_${{ env.ENV_NAME }}
+
+    - name: Upload Plan
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-plan-${{ env.ENV_NAME }}
+        path: ${{ env.TERRAFORM_DIRECTORY }}/${{ env.ENV_NAME }}.tfplan
+        retention-days: 1  # Keep artifacts for 1 day
+
+    - name: Echo the GitHub Run ID and terraform plan
+      run: |
+        echo "The GitHub run ID is: ${{ github.run_id }}"
+        cat ${{ env.TERRAFORM_DIRECTORY }}/${{ env.ENV_NAME }}.tfplan.txt

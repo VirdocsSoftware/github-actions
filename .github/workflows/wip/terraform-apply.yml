@@ -1,0 +1,52 @@
+name: Terraform Apply (Manual Trigger)
+
+on:
+  workflow_dispatch:
+    inputs:
+      env_name:
+        description: 'Environment to run Terraform Apply for'
+        required: true
+        type: choice
+        options:
+        - dev
+        - uat
+        - prod
+        default: dev
+      run_id:
+        description: 'The GitHub run id to reference when downloading a specific Terraform Plan.'
+        required: true
+
+  push:
+    branches:
+      - '**'
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    name: Terraform Apply After Approval
+    env:
+      ENV_NAME: dev
+      TERRAFORM_DIRECTORY: ./infrastructure/redshelf-dev/dev/data-ingestion-api/terraform
+
+      # ENV_NAME: $ {{ github.event.inputs.env_name }}
+      # TERRAFORM_DIRECTORY: ./infrastructure/redshelf-$ {{ github.event.inputs.env_name }}/$ {{ github.event.inputs.env_name }}/data-ingestion-api/terraform
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials for Deployment
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets[format('{0}_AWS_ACCESS_KEY_ID', env.ENV_NAME)] }}
+        aws-secret-access-key: ${{ secrets[format('{0}_AWS_SECRET_ACCESS_KEY', env.ENV_NAME)] }}
+        aws-region: ${{ vars[format('{0}_AWS_REGION', env.ENV_NAME)] }}
+
+    - name: Download Terraform Plan
+      uses: actions/download-artifact@v4
+      # with:
+        # name: terraform-plan-${{ env.ENV_NAME }}
+        # run-id: 
+
+    - name: Run Terraform Apply
+      run: make apply_${{ env.ENV_NAME }}

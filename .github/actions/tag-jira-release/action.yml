@@ -1,0 +1,42 @@
+name: 'Tag Jira Release'
+description: 'A GitHub Action to tag Jira releases'
+author: "Ansel Robateau"
+branding:
+  icon: 'tag'
+  color: 'blue'
+inputs:
+  target-branch:
+    description: "The target branch"
+    required: false
+    default: "origin/main"
+  jira-token:
+    description: "The Jira API token"
+    required: true
+  jira-email:
+    description: "The Jira email"
+    required: true
+  jira-domain:
+    description: "The Jira domain"
+    required: true
+  description:
+    description: "The description of the release"
+    required: false
+    default: "Next awesome release"
+  dry-run:
+    description: "Whether to run in dry-run mode"
+    required: false
+    default: "false"
+
+runs:
+  using: 'composite'
+  steps:
+    - id: composite
+      run: bash ${{ github.action_path }}/entrypoint.sh
+      shell: bash
+      env:
+        JIRA_TOKEN: ${{ inputs.jira-token }}
+        JIRA_EMAIL: ${{ inputs.jira-email }}
+        JIRA_DOMAIN: ${{ inputs.jira-domain }}
+        DESCRIPTION: ${{ inputs.description }}
+        TARGET_BRANCH: ${{ inputs.target-branch }}
+        DRY_RUN: ${{ inputs.dry-run }}
