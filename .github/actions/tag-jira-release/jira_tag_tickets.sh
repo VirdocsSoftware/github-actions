@@ -112,8 +112,7 @@ function existing_version() {
 NEXT_PREDICTED_VERSION="$($GIT_PREDICT_NEXT_VERSION_PATH)"
 # if this branch does not start with `release/` or `hotfix`
 # then find the target branch
-CURRENT_BRANCH="$(get_current_branch)"
-if [[ "$CURRENT_BRANCH" =~ ^release/.*$ ]] || [[ "$CURRENT_BRANCH" =~ ^hotfix/.*$ ]]; then
+if [ "$IS_RELEASE" == "true" ]; then
   echo "Using target branch $TARGET_BRANCH"
 else
   TARGET_BRANCH="$(get_target_branch $NEXT_PREDICTED_VERSION)"

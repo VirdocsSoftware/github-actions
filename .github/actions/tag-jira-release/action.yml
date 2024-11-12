@@ -22,6 +22,10 @@ inputs:
     description: "The description of the release"
     required: false
     default: "Next awesome release"
+  is-release:
+    description: "Whether to create a release"
+    required: false
+    default: "false"
   dry-run:
     description: "Whether to run in dry-run mode"
     required: false
@@ -40,3 +44,4 @@ runs:
         DESCRIPTION: ${{ inputs.description }}
         TARGET_BRANCH: ${{ inputs.target-branch }}
         DRY_RUN: ${{ inputs.dry-run }}
+        IS_RELEASE: ${{ inputs.is-release }}
