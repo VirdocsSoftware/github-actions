@@ -110,7 +110,11 @@ function existing_version() {
 }
 
 NEXT_PREDICTED_VERSION="$($GIT_PREDICT_NEXT_VERSION_PATH)"
-TARGET_BRANCH="$(get_target_branch $NEXT_PREDICTED_VERSION)"
+if [ "$IS_RELEASE" == "true" ]; then
+  echo "Using target branch $TARGET_BRANCH"
+else
+  TARGET_BRANCH="$(get_target_branch $NEXT_PREDICTED_VERSION)"
+fi
 TICKETS="$(get_tickets_in_current_branch $TARGET_BRANCH)"
 
 if [ "$TICKETS" == "" ]; then

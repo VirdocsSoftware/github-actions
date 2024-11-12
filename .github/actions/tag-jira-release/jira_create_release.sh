@@ -101,6 +101,52 @@ function create_release() {
   echo "$response"
 }
 
+function update_release() {
+  local release="$1"
+  local description="$2"
+  local projectId="$3"
+  local release_id="$(existing_release "$release" | jq -r .id)"
+  
+  # Constructing JSON payload using jq for safety
+  local payload=$(jq --null-input \
+    --arg name "$release" \
+    --arg description "$description" \
+    --argjson projectId "$projectId" \
+    --arg released "false" \
+    --argjson archived "false" \
+    --arg releaseDate "$(next_release_date "$RELEASE_DAY")" \
+    '{
+      archived: $archived,
+      name: $name,
+      description: $description,
+      projectId: $projectId,
+      released: $released,
+      releaseDate: $releaseDate
+    }')
+
+  local url="$JIRA_URL/version/$release_id"
+
+  # Use curl to get both response body and status code
+  local response_body
+  local http_status
+
+  # Execute curl and capture both response body and status code
+  response_body=$($CURL_PATH -s -o >(cat) -w "%{http_code}" -X PUT -H "Accept: application/json" -H "Content-Type: application/json" -u "$USERNAME:$TOKEN" "$url" -d "$payload")
+  
+  # Extracting HTTP status code from the end of response_body
+  http_status="${response_body:(-3)}"
+  
+  # Removing HTTP status code from response_body
+  response_body="${response_body%$http_status}"
+
+  # Return or print both values as needed
+  echo "Response Body: $response_body"
+  echo "HTTP Status Code: $http_status"
+
+  # Optionally, return just the status code if that's all you need:
+  return $http_status
+}
+
 function get_versions() {
   response=$($CURL_PATH -X GET -H "Accept: application/json" -u "$USERNAME:$TOKEN" "$JIRA_URL/project/${JIRA_PROJECT}/version?query=$1")
 
@@ -118,7 +164,7 @@ PROJECT_ID="$(get_project_by_key "$JIRA_PROJECT" | jq -r .id)"
 
 if [ "$(existing_release "$1")" != "" ]; then
   echo "Release $1 already exists"
-  exit 0
+  update_release "$1" "$2" "$PROJECT_ID"
 else
   create_release "$1" "$2" "$PROJECT_ID"
 fi
