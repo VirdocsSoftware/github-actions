@@ -23,7 +23,7 @@ inputs:
     required: false
     default: "Next awesome release"
   is-release:
-    description: "Whether to create a release"
+    description: "Is this a release branch?"
     required: false
     default: "false"
   dry-run:
