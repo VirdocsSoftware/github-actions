@@ -144,7 +144,11 @@ function update_release() {
   echo "HTTP Status Code: $http_status"
 
   # Optionally, return just the status code if that's all you need:
-  return $http_status
+  if [ "$http_status" -ne 200 ]; then
+    echo "Failed to update release $release"
+    exit 1
+  fi
+  return 0
 }
 
 function get_versions() {
