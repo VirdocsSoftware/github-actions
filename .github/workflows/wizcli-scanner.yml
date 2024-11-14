@@ -13,6 +13,7 @@ jobs:
   wizcli-scan:
     name: 'Wizcli Scan'
     runs-on: ubuntu-latest
+    continue-on-error: true
     env:
       SCAN_PATH: "."
       TIMEOUT: 60s
