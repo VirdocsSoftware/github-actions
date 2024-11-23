@@ -12,7 +12,8 @@ on:
       is-release:
         description: "The flag to determine if the action is a release.  Otherwise, it is a pre-release."
         type: boolean
-        required: true
+        default: false
+        required: false
       dry-run:
         description: "The flag to determine if the action is a dry run."
         type: boolean
