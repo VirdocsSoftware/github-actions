@@ -1,0 +1,35 @@
+on:
+  workflow_call:
+    inputs:
+      head-ref:
+        description: "The head ref of the pull request."
+        type: string
+        required: true
+      base-ref:
+        description: "The base ref of the pull request."
+        type: string
+        required: true
+      event-name:
+        description: "The name of the event that triggered the workflow."
+        type: string
+        required: true
+
+jobs:
+  check-release:
+    name: Check Release
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install Dependencies
+        run: |
+          sudo apt install figlet
+      - name: Confirm Release Version
+        run: |
+          tooling/scripts/check_release_version.sh
+        env:
+          CURRENT_BRANCH: ${{ inputs.head-ref }}
+          TARGET_BRANCH: ${{ inputs.base-ref }}
+          EVENT: ${{ inputs.event-name }}
