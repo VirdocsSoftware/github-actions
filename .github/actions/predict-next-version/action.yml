@@ -1,0 +1,35 @@
+name: "Predict Next Version"
+description: "Returns the latest version tag and the next version."
+inputs:
+  github-token:
+    description: "GitHub token to access the repository."
+    required: true
+outputs:
+  latest-version:
+    description: "The latest version tag."
+  next-version:
+    description: "The predicted next version."
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ inputs.github-token }}
+        fetch-depth: 0
+    - name: Get Latest Version Tag
+      id: get_latest_version
+      run: |
+        ./git_latest_version_tag.sh > latest_version.txt
+      shell: bash
+      working-directory: ${{ github.action_path }}
+    - name: Predict Next Version
+      id: predict_next_version
+      run: |
+        ./git_predict_next_version.sh > next_version.txt
+      working-directory: ${{ github.action_path }}
+      shell: bash
+    - name: Set Outputs
+      run: |
+        echo "latest-version=$(cat latest_version.txt)" >> $GITHUB_OUTPUT
+        echo "next-version=$(cat next_version.txt)" >> $GITHUB_OUTPUT
