@@ -1,0 +1,25 @@
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "The version of the release."
+        type: string
+        required: true
+      parent-page:
+        description: "The parent page to create the release notes."
+        type: string
+        required: true
+jobs:
+  notify-release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Create Confluence Release Notes
+        uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@ar-CORE-1467-create-sharable-jobs
+        with:
+          version: ${{ inputs.version }}
+          parent-page: ${{ inputs.parent-page }}

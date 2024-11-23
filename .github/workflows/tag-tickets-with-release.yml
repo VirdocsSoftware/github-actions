@@ -9,6 +9,15 @@ on:
         description: "The JIRA domain to tag the release."
         type: string
         required: true
+      is-release:
+        description: "The flag to determine if the action is a release.  Otherwise, it is a pre-release."
+        type: boolean
+        required: true
+      dry-run:
+        description: "The flag to determine if the action is a dry run."
+        type: boolean
+        required: false
+        default: false
     secrets:
       LLM_API_TOKEN:
         description: "A valid LLM API token to be used by the action."
@@ -54,4 +63,5 @@ jobs:
           jira-token: ${{ secrets.JIRA_API }}
           jira-email: ${{ secrets.JIRA_API_CREDENTIALS }}
           jira-domain: ${{ inputs.jira-domain }}
-          dry-run: 'false'
+          dry-run: ${{ inputs.dry-run }}
+          is-release: ${{ inputs.is-release }}
