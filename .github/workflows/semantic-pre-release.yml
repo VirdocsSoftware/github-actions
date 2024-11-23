@@ -1,0 +1,27 @@
+on:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        description: "A valid GitHub token to be used by the action."
+
+jobs:
+  semantic-pre-release:
+    name: Semantic Pre Release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    if: |
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/develop'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+      - name: Run semantic release
+        run: npx semantic-release@23 -d
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
