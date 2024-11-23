@@ -1,7 +1,7 @@
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
+      semantic-github-token:
         description: "A valid GitHub token to be used by the action."
 
 jobs:
@@ -24,4 +24,4 @@ jobs:
       - name: Run semantic release
         run: npx semantic-release@23
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.semantic-github-token }}
