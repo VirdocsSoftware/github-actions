@@ -1,5 +1,14 @@
 on:
   workflow_call:
+    inputs:
+      target-branch:
+        description: "The target branch to tag the release."
+        type: string
+        required: true
+      jira-domain:
+        description: "The JIRA domain to tag the release."
+        type: string
+        required: true
     secrets:
       LLM_API_TOKEN:
         description: "A valid LLM API token to be used by the action."
@@ -41,8 +50,8 @@ jobs:
       - uses: VirdocsSoftware/github-actions/.github/actions/tag-jira-release@main
         with:
           description: ${{ steps.llm_action.outputs.response }}
-          target-branch: 'origin/main'
+          target-branch: ${{ inputs.target-branch }}
           jira-token: ${{ secrets.JIRA_API }}
           jira-email: ${{ secrets.JIRA_API_CREDENTIALS }}
-          jira-domain: 'virdocs.atlassian.net'
+          jira-domain: ${{ inputs.jira-domain }}
           dry-run: 'false'
