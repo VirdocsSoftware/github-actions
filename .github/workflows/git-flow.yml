@@ -48,6 +48,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - name: Run feature tests
+        run: |
+          npm run test:features
 
   deploy-check:
     name: Deployment Check
