@@ -5,7 +5,7 @@ on:
         description: "The version of the release."
         type: string
         required: true
-      parent-page:
+      parent-page-id:
         description: "The parent page to create the release notes."
         type: string
         required: true
@@ -34,7 +34,7 @@ jobs:
         uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@ar-CORE-1467-create-sharable-jobs
         with:
           version: ${{ inputs.version }}
-          parent-page: ${{ inputs.parent-page }}
+          parent-page: ${{ inputs.parent-page-id }}
           jira-username: ${{ inputs.jira-username }}
           jira-domain: ${{ inputs.jira-domain }}
           jira-api-token: ${{ secrets.jira-api-token }}

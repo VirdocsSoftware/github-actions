@@ -18,15 +18,16 @@ on:
         type: boolean
         required: false
         default: false
+      jira-username:
+        description: "The JIRA username to tag the release."
+        type: string
+        required: true
     secrets:
-      LLM_API_TOKEN:
+      llm-api-token:
         description: "A valid LLM API token to be used by the action."
         required: true
-      JIRA_API:
+      jira-api-token:
         description: "A valid JIRA API token to be used by the action."
-        required: true
-      JIRA_API_CREDENTIALS:
-        description: "A valid JIRA API email to be used by the action."
         required: true
 
 jobs:
@@ -52,7 +53,7 @@ jobs:
       - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
         id: llm_action
         with:
-          gemini-api-key: ${{ secrets.LLM_API_TOKEN }}
+          gemini-api-key: ${{ secrets.llm-api-token }}
           prompt: ${{ steps.create_prompt.outputs.LLM_PROMPT }}
       - name: Debug
         run: echo '${{ steps.llm_action.outputs.response }}'
@@ -60,8 +61,8 @@ jobs:
         with:
           description: ${{ steps.llm_action.outputs.response }}
           target-branch: ${{ inputs.target-branch }}
-          jira-token: ${{ secrets.JIRA_API }}
-          jira-email: ${{ secrets.JIRA_API_CREDENTIALS }}
+          jira-token: ${{ secrets.jira-api-token }}
+          jira-email: ${{ inputs.jira-username }}
           jira-domain: ${{ inputs.jira-domain }}
           dry-run: ${{ inputs.dry-run }}
           is-release: ${{ inputs.is-release }}
