@@ -13,6 +13,10 @@ on:
         description: "The name of the event that triggered the workflow."
         type: string
         required: true
+    secrets:
+      github-token:
+        description: "A valid GitHub token to be used by the action."
+        required: true
 
 jobs:
   check-release:
@@ -23,6 +27,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-CORE-1467-create-sharable-jobs
+        id: predict-next-version
       - name: Install Dependencies
         run: |
           sudo apt install figlet
@@ -73,9 +79,6 @@ jobs:
             exit 0
           fi
           PACKAGE_VERSION=$($JQ_PATH -r .version $PACKAGE_PATH/package.json);
-          if [ "$NEXT_PREDICTED_RELEASE" == "" ]; then
-            NEXT_PREDICTED_RELEASE=$($SCRIPT_PATH/git_predict_next_version.sh)
-          fi
           if [ "$NEXT_PREDICTED_RELEASE" != "$PACKAGE_VERSION" ]; then
             echo "Release Version = $NEXT_PREDICTED_RELEASE";
             echo "Package Version = $PACKAGE_VERSION";
@@ -90,3 +93,4 @@ jobs:
           CURRENT_BRANCH: ${{ inputs.head-ref }}
           TARGET_BRANCH: ${{ inputs.base-ref }}
           EVENT: ${{ inputs.event-name }}
+          NEXT_PREDICTED_RELEASE: ${{ steps.predict-next-version.outputs.next-version }}
