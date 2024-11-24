@@ -26,5 +26,7 @@ runs:
     - name: Set Outputs
       shell: bash
       run: |
+        echo "latest-version=$(cat latest_version.txt)"
         echo "latest-version=$(cat latest_version.txt)" >> $GITHUB_OUTPUT
+        echo "next-version=$(cat next_version.txt)"
         echo "next-version=$(cat next_version.txt)" >> $GITHUB_OUTPUT
