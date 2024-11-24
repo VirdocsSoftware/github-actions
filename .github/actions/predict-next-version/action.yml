@@ -9,6 +9,10 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - name: Get Latest Version Tag
       id: get_latest_version
       run: |
