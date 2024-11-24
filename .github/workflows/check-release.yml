@@ -25,6 +25,11 @@ jobs:
           fetch-depth: 0
       - uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-CORE-1467-create-sharable-jobs
         id: predict-next-version
+      - name: Debug Outputs
+        run: |
+          echo "Latest Version: ${{ steps.predict-next-version.outputs.latest-version }}"
+          echo "Next Version: ${{ steps.predict-next-version.outputs.next-version }}"
+      
       - name: Install Dependencies
         run: |
           sudo apt install figlet
