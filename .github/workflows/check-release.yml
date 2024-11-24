@@ -27,8 +27,10 @@ jobs:
         id: predict-next-version
       - name: Debug Outputs
         run: |
+          echo "DEBUG: Steps outputs"
           echo "Latest Version: ${{ steps.predict-next-version.outputs.latest-version }}"
           echo "Next Version: ${{ steps.predict-next-version.outputs.next-version }}"
+      
       
       - name: Install Dependencies
         run: |
