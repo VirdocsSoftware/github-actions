@@ -13,10 +13,6 @@ on:
         description: "The name of the event that triggered the workflow."
         type: string
         required: true
-    secrets:
-      github-token:
-        description: "A valid GitHub token to be used by the action."
-        required: true
 
 jobs:
   check-release:
