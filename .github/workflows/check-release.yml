@@ -30,6 +30,7 @@ jobs:
           sudo apt install figlet
       - name: Confirm Release Version
         run: |
+          echo "${{ toJson(steps.predict-next-version.outputs) }}"
           if [ "$EVENT" != "pull_request" ]; then
             echo "Not applicable"
             exit 0
