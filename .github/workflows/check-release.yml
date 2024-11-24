@@ -30,7 +30,8 @@ jobs:
           echo "DEBUG: Steps outputs"
           echo "Latest Version: ${{ steps.predict-next-version.outputs.latest-version }}"
           echo "Next Version: ${{ steps.predict-next-version.outputs.next-version }}"
-      
+          echo "Latest Version: ${{ env.LATEST_VERSION }}"
+          echo "Next Version: ${{ env.NEXT_VERSION }}"
       
       - name: Install Dependencies
         run: |
@@ -97,4 +98,4 @@ jobs:
           CURRENT_BRANCH: ${{ inputs.head-ref }}
           TARGET_BRANCH: ${{ inputs.base-ref }}
           EVENT: ${{ inputs.event-name }}
-          NEXT_PREDICTED_RELEASE: ${{ steps.predict-next-version.outputs.next-version }}
+          NEXT_PREDICTED_RELEASE: ${{ env.NEXT_VERSION }}

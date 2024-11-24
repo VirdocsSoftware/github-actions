@@ -28,3 +28,5 @@ runs:
       run: |
         echo "latest-version=$(cat latest_version.txt)" >> $GITHUB_OUTPUT
         echo "next-version=$(cat next_version.txt)" >> $GITHUB_OUTPUT
+        echo "LATEST_VERSION=$(cat latest_version.txt)" >> $GITHUB_ENV
+        echo "NEXT_VERSION=$(cat next_version.txt)" >> $GITHUB_ENV
