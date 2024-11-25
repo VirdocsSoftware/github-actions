@@ -30,7 +30,7 @@ jobs:
         run: |
           echo "version=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
       - name: Create Confluence Release Notes
-        uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@ar-CORE-1467-create-sharable-jobs
+        uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@main
         with:
           version: ${{ env.version }}
           parent-page: ${{ inputs.parent-page-id }}

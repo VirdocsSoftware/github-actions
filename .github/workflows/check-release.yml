@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-CORE-1467-create-sharable-jobs
+      - uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@main
         id: predict-next-version
       - name: Debug Outputs
         run: |
