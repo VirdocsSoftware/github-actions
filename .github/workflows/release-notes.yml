@@ -1,10 +1,6 @@
 on:
   workflow_call:
     inputs:
-      version:
-        description: "The version of the release."
-        type: string
-        required: true
       parent-page-id:
         description: "The parent page to create the release notes."
         type: string
@@ -30,10 +26,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Get Version
+        run: |
+          echo "version=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
       - name: Create Confluence Release Notes
         uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@ar-CORE-1467-create-sharable-jobs
         with:
-          version: ${{ inputs.version }}
+          version: ${{ env.version }}
           parent-page: ${{ inputs.parent-page-id }}
           jira-username: ${{ inputs.jira-username }}
           jira-domain: ${{ inputs.jira-domain }}
