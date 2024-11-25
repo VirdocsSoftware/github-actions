@@ -102,7 +102,7 @@ function get_next_release_number() {
 
 function get_tickets_in_current_branch() {
   local target_branch="$1"
-  $TICKET_STATUS_PATH . "$target_branch" | grep -v '"Done"' | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
+  $TICKET_STATUS_PATH HEAD "$target_branch" | grep -v '"Done"' | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
 }
 
 function existing_version() {
