@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BASE_FOLDER=$(dirname $BASH_SOURCE)
+BASE_FOLDER="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if [ "$CURRENT_VERSION" == "" ] && [ "$TESTING" != "true" ]; then
   CURRENT_VERSION=$($BASE_FOLDER/git_latest_version_tag.sh)
 fi
