@@ -5,5 +5,5 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 if [ "$DRY_RUN" == "true" ]; then
   $SCRIPT_DIR/jira_tag_tickets.sh --dry-run
 else
-  bash -xv $SCRIPT_DIR/jira_tag_tickets.sh
+  $SCRIPT_DIR/jira_tag_tickets.sh
 fi
