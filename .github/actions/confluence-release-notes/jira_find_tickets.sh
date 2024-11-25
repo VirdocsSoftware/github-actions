@@ -39,6 +39,6 @@ TICKET_INFO=$(curl \
   -X GET \
   --user ${USERNAME}:${TOKEN} \
   -H "Content-Type: application/json" \
-  "https://$JIRA_DOMAIN.atlassian.net/rest/api/2/search?jql=$JQL" 2>/dev/null)
+  "https://$JIRA_DOMAIN/rest/api/2/search?jql=$JQL" 2>/dev/null)
 
 echo $TICKET_INFO | jq .
