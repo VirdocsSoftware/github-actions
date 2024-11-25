@@ -1,0 +1,19 @@
+on:
+  workflow_call:
+    secrets:
+      env-github-token:
+        description: "A valid GitHub token to be used by the action."
+        required: true
+
+jobs:
+  initialize:
+    name: Initialize
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cancel Previous Runs
+        if: ${{ github.ref != 'refs/heads/develop' && github.ref != 'refs/heads/main' }}
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ secrets.env-github-token }}

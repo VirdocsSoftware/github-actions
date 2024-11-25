@@ -1,0 +1,52 @@
+name: Confluence Release Notes
+description: "Create release notes in Confluence."
+inputs:
+  version:
+    description: "The version of the release."
+    type: string
+    required: true
+  parent-page:
+    description: "The parent page to create the release notes."
+    type: string
+    required: true
+  jira-username:
+    description: "The JIRA username to tag the release."
+    type: string
+    required: true
+  jira-domain:
+    description: "The JIRA domain to tag the release."
+    type: string
+    required: true
+  jira-api-token:
+    description: "The JIRA API token to tag the release."
+    type: string
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Create Release Notes
+      shell: bash
+      run: |
+        REPOSITORY_NAME=$(echo $GITHUB_REPOSITORY | cut -d'/' -f2)
+        RELEASE_NAME=$(echo $REPOSITORY_NAME-v$VERSION)
+        echo "RELEASE_NAME=$RELEASE_NAME"
+        JQL="fixVersion = $RELEASE_NAME"
+        ${{ github.action_path }}/jira_find_tickets.sh "$JQL" > jira_tickets.json
+        echo "*** JIRA Tickets ***"
+        cat jira_tickets.json
+        node ${{ github.action_path }}/generate_release_notes.js jira_tickets.json ${{ github.action_path }}/release_notes.html
+        echo "*** Release Notes ***"
+        cat ${{ github.action_path }}/release_notes.html
+        YEAR=$(date +'%Y')
+        DATE=$(date +'%Y-%m-%d')
+        bash -xv ${{ github.action_path }}/confluence_create_release_page.sh "$YEAR" "$RELEASE_NAME" "$DATE" ${{ github.action_path }}/release_notes.html > results.json
+        echo "*** Results ***"
+        cat results.json
+        jq -r '"\(.["_links"].base)\(.["_links"].webui)"' results.json
+      env:
+        VERSION: ${{ inputs.version }}
+        JIRA_USERNAME: ${{ inputs.jira-username }}
+        JIRA_DOMAIN: ${{ inputs.jira-domain }}
+        JIRA_API_TOKEN: ${{ inputs.jira-api-token }}
+        PARENT_PAGE_ID: ${{ inputs.parent-page }}
