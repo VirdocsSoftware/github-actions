@@ -69,7 +69,7 @@ class ReleaseNotesGenerator {
         if (parent) {
             const { fields } = parent;
             const { customfield_11625: impact } = fields;
-            if(impact) {
+            if (impact) {
                 return impact;
             }
             return this.getParentImpactSummary(parent);
