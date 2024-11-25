@@ -4,34 +4,36 @@
   "description": "Used to store GitHub actions for use across the enterprise",
   "scripts": {
     "test": "./tooling/scripts/run_tests.sh",
-    "test:features": "./tooling/scripts/run_feature_tests.sh"
+    "test:features": "./tooling/scripts/run_feature_tests.sh",
+    "prettier": "prettier --write '**/*.{ts,js}'"
   },
   "devDependencies": {
     "@semantic-release/github": "^9.0.3",
-    "@semantic-release/release-notes-generator": "^11.0.3"
+    "@semantic-release/release-notes-generator": "^11.0.3",
+    "prettier": "^2.8.0"
   },
   "release": {
-      "branches": [
-          "main",
-          {
-              "name": "develop",
-              "prerelease": true
-          }
+    "branches": [
+      "main",
+      {
+        "name": "develop",
+        "prerelease": true
+      }
+    ],
+    "plugins": [
+      [
+        "@semantic-release/release-notes-generator",
+        {
+          "linkReferences": false
+        }
       ],
-      "plugins": [
-          [
-              "@semantic-release/release-notes-generator",
-              {
-                  "linkReferences": false
-              }
-          ],
-          [
-              "@semantic-release/github",
-              {
-                  "successComment": false,
-                  "failComment": false
-              }
-          ]
+      [
+        "@semantic-release/github",
+        {
+          "successComment": false,
+          "failComment": false
+        }
       ]
+    ]
   }
 }
