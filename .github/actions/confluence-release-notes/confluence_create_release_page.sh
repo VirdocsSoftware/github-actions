@@ -27,8 +27,6 @@ if [ "$CREATE_PAGE_CMD" == "" ]; then
     CREATE_PAGE_CMD="$SCRIPT_DIR/confluence_post_page.sh"
 fi
 
-# Create titles for folder and page
-FOLDER_TITLE="$YEAR Release Notes"
 PAGE_TITLE="$RELEASE_END_DATE Release Notes - $RELEASE_NAME"
 
 show_usage() {
@@ -39,17 +37,6 @@ show_usage() {
 get_parent_page() {
     local response="$($GET_PAGE_CMD -i "$PARENT_PAGE_ID")"
     echo $response
-}
-
-create_folder() {
-    local space_id=$1
-    local content="$2"
-    RESPONSE="$($CREATE_PAGE_CMD "$PARENT_PAGE_ID" "$space_id" "$FOLDER_TITLE" "$content")"
-    if [ "$(echo $RESPONSE | jq -r .id)" == "" ]; then
-        echo "Error creating folder"
-        exit 1
-    fi
-    echo $RESPONSE
 }
 
 create_release_notes() {
