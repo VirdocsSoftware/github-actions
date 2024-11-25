@@ -1,0 +1,32 @@
+name: "Predict Next Version"
+description: "Returns the latest version tag and the next version."
+
+outputs:
+  latest-version:
+    description: "The latest version tag."
+  next-version:
+    description: "The predicted next version."
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Get Latest Version Tag
+      id: get_latest_version
+      run: |
+        ${{ github.action_path }}/git_latest_version_tag.sh | tee latest_version.txt
+      shell: bash
+    - name: Predict Next Version
+      id: predict_next_version
+      run: |
+        ${{ github.action_path }}/git_predict_next_version.sh | tee next_version.txt
+      shell: bash
+    - name: Set Outputs
+      shell: bash
+      run: |
+        echo "latest-version=$(cat latest_version.txt)" >> $GITHUB_OUTPUT
+        echo "next-version=$(cat next_version.txt)" >> $GITHUB_OUTPUT
+        echo "LATEST_VERSION=$(cat latest_version.txt)" >> $GITHUB_ENV
+        echo "NEXT_VERSION=$(cat next_version.txt)" >> $GITHUB_ENV

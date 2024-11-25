@@ -1,0 +1,69 @@
+on:
+  workflow_call:
+    inputs:
+      target-branch:
+        description: "The target branch to tag the release."
+        type: string
+        required: true
+      jira-domain:
+        description: "The JIRA domain to tag the release."
+        type: string
+        required: true
+      is-release:
+        description: "The flag to determine if the action is a release.  Otherwise, it is a pre-release."
+        type: boolean
+        default: false
+        required: false
+      dry-run:
+        description: "The flag to determine if the action is a dry run."
+        type: boolean
+        required: false
+        default: false
+      jira-username:
+        description: "The JIRA username to tag the release."
+        type: string
+        required: true
+    secrets:
+      llm-api-token:
+        description: "A valid LLM API token to be used by the action."
+        required: true
+      jira-api-token:
+        description: "A valid JIRA API token to be used by the action."
+        required: true
+
+jobs:
+  tag-jira-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: create prompt
+        id: create_prompt
+        run: |
+          DIFF="$(git log --pretty=format:'%s' origin/main..HEAD)"
+          LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
+          "
+          LLM_PROMPT="$LLM_PROMPT_PREFIX$DIFF"
+          echo "$LLM_PROMPT"
+          # Use a delimiter to properly handle the multi-line value
+          echo "LLM_PROMPT<<EOF" >> $GITHUB_OUTPUT
+          echo "$LLM_PROMPT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+      - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
+        id: llm_action
+        with:
+          gemini-api-key: ${{ secrets.llm-api-token }}
+          prompt: ${{ steps.create_prompt.outputs.LLM_PROMPT }}
+      - name: Debug
+        run: echo '${{ steps.llm_action.outputs.response }}'
+      - uses: VirdocsSoftware/github-actions/.github/actions/tag-jira-release@main
+        with:
+          description: ${{ steps.llm_action.outputs.response }}
+          target-branch: ${{ inputs.target-branch }}
+          jira-token: ${{ secrets.jira-api-token }}
+          jira-email: ${{ inputs.jira-username }}
+          jira-domain: ${{ inputs.jira-domain }}
+          dry-run: ${{ inputs.dry-run }}
+          is-release: ${{ inputs.is-release }}

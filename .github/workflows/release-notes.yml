@@ -1,0 +1,39 @@
+on:
+  workflow_call:
+    inputs:
+      parent-page-id:
+        description: "The parent page to create the release notes."
+        type: string
+        required: true
+      jira-username:
+        description: "The JIRA username to tag the release."
+        type: string
+        required: true
+      jira-domain:
+        description: "The JIRA domain to tag the release."
+        type: string
+        required: true
+    secrets:
+      jira-api-token:
+        description: "The JIRA API token to tag the release."
+        required: true
+jobs:
+  notify-release:
+    name: Notify Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get Version
+        run: |
+          echo "version=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
+      - name: Create Confluence Release Notes
+        uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@ar-CORE-1467-create-sharable-jobs
+        with:
+          version: ${{ env.version }}
+          parent-page: ${{ inputs.parent-page-id }}
+          jira-username: ${{ inputs.jira-username }}
+          jira-domain: ${{ inputs.jira-domain }}
+          jira-api-token: ${{ secrets.jira-api-token }}
