@@ -40,7 +40,7 @@ runs:
         cat ${{ github.action_path }}/release_notes.html
         YEAR=$(date +'%Y')
         DATE=$(date +'%Y-%m-%d')
-        bash -xv ${{ github.action_path }}/confluence_create_release_page.sh "$YEAR" "$RELEASE_NAME" "$DATE" ${{ github.action_path }}/release_notes.html > results.json
+        ${{ github.action_path }}/confluence_create_release_page.sh "$YEAR" "$RELEASE_NAME" "$DATE" ${{ github.action_path }}/release_notes.html > results.json
         echo "*** Results ***"
         cat results.json
         jq -r '"\(.["_links"].base)\(.["_links"].webui)"' results.json
