@@ -14,7 +14,7 @@ DOMAIN="$(echo $JIRA_CONFIG | jq -r .jira.domain)"
 function get_page_by_id() {
     PAGE_ID=$1
     RESPONSE=$($CURL_CMD --silent --request GET \
-    --url "https://$DOMAIN.atlassian.net/wiki/api/v2/pages/$PAGE_ID" \
+    --url "https://$DOMAIN/wiki/api/v2/pages/$PAGE_ID" \
     --user "$ATLASSIAN_USER:$ATLASSIAN_API_TOKEN" \
     --header 'Accept: application/json' \
     --header 'Content-Type: application/json')
@@ -39,7 +39,7 @@ function url_encode() {
 function get_page_by_title() {
     PAGE_TITLE="$1"
     RESPONSE=$($CURL_CMD --silent --request GET \
-    --url "https://$DOMAIN.atlassian.net/wiki/api/v2/pages?title=$(url_encode "$PAGE_TITLE")" \
+    --url "https://$DOMAIN/wiki/api/v2/pages?title=$(url_encode "$PAGE_TITLE")" \
     --user "$ATLASSIAN_USER:$ATLASSIAN_API_TOKEN" \
     --header 'Accept: application/json' \
     --header 'Content-Type: application/json')
@@ -50,7 +50,7 @@ function get_page_by_title() {
 function get_child_pages() {
     PAGE_ID=$1
     RESPONSE=$($CURL_CMD --silent --request GET \
-    --url "https://$DOMAIN.atlassian.net/wiki/api/v2/pages/$PAGE_ID/children" \
+    --url "https://$DOMAIN/wiki/api/v2/pages/$PAGE_ID/children" \
     --user "$ATLASSIAN_USER:$ATLASSIAN_API_TOKEN" \
     --header 'Accept: application/json' \
     --header 'Content-Type: application/json')

@@ -52,7 +52,7 @@ function create_page() {
     payload=$(echo $payload | jq --arg page_content "$PAGE_CONTENT" '. + {body: {storage: {value: $page_content, representation: "storage"}}}')
 
     local response="$($CURL_CMD --silent --request POST \
-        --url "https://$DOMAIN.atlassian.net/wiki/api/v2/pages" \
+        --url "https://$DOMAIN/wiki/api/v2/pages" \
         --user "$ATLASSIAN_USER:$ATLASSIAN_API_TOKEN" \
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
@@ -87,7 +87,7 @@ function update_page() {
     payload=$(echo $payload | jq --arg page_content "$PAGE_CONTENT" '. + {body: {storage: {value: $page_content, representation: "storage"}}}')
     payload=$(echo $payload | jq --arg version "$VERSION" '. + {version: {number: $version, message: "Updated page content"}}')
     local response="$($CURL_CMD --silent --request PUT \
-        --url "https://$DOMAIN.atlassian.net/wiki/api/v2/pages/$PAGE_ID" \
+        --url "https://$DOMAIN/wiki/api/v2/pages/$PAGE_ID" \
         --user "$ATLASSIAN_USER:$ATLASSIAN_API_TOKEN" \
         --header 'Accept: application/json' \
         --header 'Content-Type: application/json' \
