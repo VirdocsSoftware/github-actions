@@ -14,7 +14,7 @@ if [ "$1" == "--dry-run" ]; then
 fi
 
 if [ "$TICKET_STATUS_PATH" == "" ]; then
-  TICKET_STATUS_PATH=$SCRIPT_DIR/ticket_status.sh
+  TICKET_STATUS_PATH="$SCRIPT_DIR/ticket_status.sh"
 fi
 
 if [ "$GIT_PREDICT_NEXT_VERSION_PATH" == "" ]; then
@@ -102,7 +102,10 @@ function get_next_release_number() {
 
 function get_tickets_in_current_branch() {
   local target_branch="$1"
-  $TICKET_STATUS_PATH . "$target_branch" | grep -v '"Done"' | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
+  echo "Checking for tickets between $(get_current_branch) and $target_branch" >&2
+  local ticket_info="$($TICKET_STATUS_PATH $(get_current_branch) $target_branch)"
+  echo "$ticket_info" >&2
+  echo "$ticket_info" | grep -v '"Done"' | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
 }
 
 function existing_version() {
