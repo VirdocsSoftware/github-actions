@@ -42,7 +42,7 @@ jobs:
       - name: create prompt
         id: create_prompt
         run: |
-          DIFF="$(git log --pretty=format:'%s' origin/main..HEAD)"
+          DIFF="$(git log --pretty=format:'%s' ${TARGET_BRANCH}..HEAD)"
           LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
           "
           LLM_PROMPT="$LLM_PROMPT_PREFIX$DIFF"
@@ -51,6 +51,8 @@ jobs:
           echo "LLM_PROMPT<<EOF" >> $GITHUB_OUTPUT
           echo "$LLM_PROMPT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          TARGET_BRANCH: ${{ inputs.target-branch }}
       - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
         id: llm_action
         with:
