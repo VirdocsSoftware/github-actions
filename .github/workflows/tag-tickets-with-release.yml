@@ -19,13 +19,12 @@ on:
         type: boolean
         required: false
         default: false
-      jira-username:
-        description: "The JIRA username to tag the release."
-        type: string
-        required: true
     secrets:
       llm-api-token:
         description: "A valid LLM API token to be used by the action."
+        required: true
+      jira-username:
+        description: "The JIRA username to tag the release."
         required: true
       jira-api-token:
         description: "A valid JIRA API token to be used by the action."
@@ -65,7 +64,7 @@ jobs:
           description: ${{ steps.llm_action.outputs.response }}
           target-branch: ${{ inputs.target-branch }}
           jira-token: ${{ secrets.jira-api-token }}
-          jira-email: ${{ inputs.jira-username }}
+          jira-email: ${{ secrets.jira-username }}
           jira-domain: ${{ inputs.jira-domain }}
           dry-run: ${{ inputs.dry-run }}
           is-release: ${{ inputs.is-release }}
