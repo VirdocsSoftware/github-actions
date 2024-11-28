@@ -2,6 +2,8 @@
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
+ORIGINAL_TARGET_BRANCH=$TARGET_BRANCH
+
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
   echo "Usage: [option]"
   echo "  options:"
@@ -93,7 +95,7 @@ function increment_version() {
 function get_next_release_number() {
   local target_branch="$1"
   local next_version="$2"
-  if [ "$target_branch" == "$TARGET_BRANCH" ]; then
+  if [ "$target_branch" == "$ORIGINAL_TARGET_BRANCH" ]; then
     echo "$next_version"
   else
     increment_version "$next_version"
