@@ -58,7 +58,9 @@ jobs:
           gemini-api-key: ${{ secrets.llm-api-token }}
           prompt: ${{ steps.create_prompt.outputs.LLM_PROMPT }}
       - name: Debug
-        run: echo '${{ steps.llm_action.outputs.response }}'
+        run: echo "$MESSAGE"
+        env:
+          MESSAGE: ${{ steps.llm_action.outputs.response }}
       - uses: VirdocsSoftware/github-actions/.github/actions/tag-jira-release@main
         with:
           description: ${{ steps.llm_action.outputs.response }}
