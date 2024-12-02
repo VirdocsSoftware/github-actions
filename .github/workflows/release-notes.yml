@@ -5,15 +5,14 @@ on:
         description: "The parent page to create the release notes."
         type: string
         required: true
-      jira-username:
-        description: "The JIRA username to tag the release."
-        type: string
-        required: true
       jira-domain:
         description: "The JIRA domain to tag the release."
         type: string
         required: true
     secrets:
+      jira-username:
+        description: "The JIRA username to tag the release."
+        required: true
       jira-api-token:
         description: "The JIRA API token to tag the release."
         required: true
