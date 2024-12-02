@@ -33,6 +33,6 @@ jobs:
         with:
           version: ${{ env.version }}
           parent-page: ${{ inputs.parent-page-id }}
-          jira-username: ${{ inputs.jira-username }}
+          jira-username: ${{ secrets.jira-username }}
           jira-domain: ${{ inputs.jira-domain }}
           jira-api-token: ${{ secrets.jira-api-token }}
