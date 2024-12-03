@@ -12,7 +12,7 @@ function validate_input {
   if [ -z "$1" ] || [ -z "$2" ]; then
     usage
   fi
-  if [ ! "$2" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]; then
+  if [[ ! "$2" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
     usage
   fi
 }
