@@ -46,8 +46,10 @@ jobs:
         run: |
           if [ "${{ inputs.is-release }}" = "true" ]; then
             TARGET_BRANCH="${{ inputs.target-branch }}"
-          else
+          elif git ls-remote --heads origin release/v$(cat next_version.txt) | grep -sw "refs/heads/release/v$(cat next_version.txt)"; then
             TARGET_BRANCH="origin/release/v$(cat next_version.txt)"
+          else
+            TARGET_BRANCH="origin/main"
           fi
           COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
           DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
