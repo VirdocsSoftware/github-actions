@@ -41,6 +41,14 @@ jobs:
       - name: create prompt
         id: create_prompt
         run: |
+          RELEASE_BRANCH=release/v$(${{ github.workspace }}/tooling/scripts/git_predict_next_version.sh)
+          # if the release branch exists set TARGET_BRANCH to the release branch else set it to origin/main
+          if git ls-remote --heads origin $RELEASE_BRANCH | grep -q $RELEASE_BRANCH; then
+            TARGET_BRANCH="origin/$RELEASE_BRANCH"
+          else
+            TARGET_BRANCH="${{ inputs.target-branch }}"
+          fi
+          COMMON_BRANCH=$(git merge-base $TARGET_BRANCH HEAD)
           COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
           DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
           LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
@@ -58,10 +66,6 @@ jobs:
         with:
           gemini-api-key: ${{ secrets.llm-api-token }}
           prompt: ${{ steps.create_prompt.outputs.LLM_PROMPT }}
-      - name: Debug
-        run: echo "$MESSAGE"
-        env:
-          MESSAGE: ${{ steps.llm_action.outputs.response }}
       - uses: VirdocsSoftware/github-actions/.github/actions/tag-jira-release@main
         with:
           description: ${{ steps.llm_action.outputs.response }}
