@@ -61,7 +61,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
         env:
           TARGET_BRANCH: ${{ inputs.target-branch }}
-          NEXT_VERSION: ${{ steps.get_next_version.outputs.next-version }}
+          NEXT_VERSION: ${{ github.env.NEXT_VERSION }}
       - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
         id: llm_action
         with:
