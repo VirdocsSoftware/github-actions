@@ -40,7 +40,7 @@ jobs:
           fetch-depth: 0
       - name: get next predicted version
         id: get_next_version
-        uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-core-1729-get-the-correct-git-log-in-shared-action
+        uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-CORE-1729-get-the-correct-git-log-in-shared-action
       - name: create prompt
         id: create_prompt
         run: |
