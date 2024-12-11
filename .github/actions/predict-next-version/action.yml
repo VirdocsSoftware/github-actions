@@ -21,7 +21,7 @@ runs:
     - name: Predict Next Version
       id: predict_next_version
       run: |
-        ${{ github.action_path }}/git_predict_next_version.sh | tee next_version.txt
+        bash -xv ${{ github.action_path }}/git_predict_next_version.sh | tee next_version.txt
       shell: bash
     - name: Set Outputs
       shell: bash
