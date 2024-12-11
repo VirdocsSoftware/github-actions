@@ -47,7 +47,7 @@ jobs:
           if [ "${{ inputs.is-release }}" = "true" ]; then
             TARGET_BRANCH="${{ inputs.target-branch }}"
           else
-            TARGET_BRANCH="origin/release/v${NEXT_VERSION}"
+            TARGET_BRANCH="origin/release/v$(cat next_version.txt)"
           fi
           COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
           DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
@@ -61,7 +61,6 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
         env:
           TARGET_BRANCH: ${{ inputs.target-branch }}
-          NEXT_VERSION: ${{ github.env.NEXT_VERSION }}
       - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
         id: llm_action
         with:
