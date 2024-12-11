@@ -38,9 +38,17 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+      - name: get next predicted version
+        id: get_next_version
+        uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@ar-core-1729-get-the-correct-git-log-in-shared-action
       - name: create prompt
         id: create_prompt
         run: |
+          if [ "${{ inputs.is-release }}" = "true" ]; then
+            TARGET_BRANCH="${{ inputs.target-branch }}"
+          else
+            TARGET_BRANCH="origin/release/v${NEXT_VERSION}"
+          fi
           COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
           DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
           LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
@@ -53,6 +61,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
         env:
           TARGET_BRANCH: ${{ inputs.target-branch }}
+          NEXT_VERSION: ${{ steps.get_next_version.outputs.next-version }}
       - uses: VirdocsSoftware/github-actions/.github/actions/llm@main
         id: llm_action
         with:
