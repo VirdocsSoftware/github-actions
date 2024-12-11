@@ -12,13 +12,16 @@ CURRENT_BRANCH=$1
 if [ "$CURRENT_BRANCH" == "" ]; then
   echo "Usage: [current_branch] [(optional) target_branch]"
   exit 1
+elif [ "$CURRENT_BRANCH" == "." ]; then
+  CURRENT_BRANCH=$(git branch --show-current)
 fi
 TARGET_BRANCH=main
 if [ "$2" != "" ]; then
   TARGET_BRANCH=$2
 fi
 
-HASHES=$(git log $TARGET_BRANCH..$CURRENT_BRANCH --pretty=format:'%H')
+COMMON_BRANCH=$(git merge-base $TARGET_BRANCH $CURRENT_BRANCH)
+HASHES=$(git log $COMMON_BRANCH..$CURRENT_BRANCH --pretty=format:'%H')
 
 if [ ! -d ~/temp ]; then
   mkdir ~/temp

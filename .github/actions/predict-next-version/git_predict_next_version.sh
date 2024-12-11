@@ -30,15 +30,17 @@ git fetch
 
 function get_logs() {
   if [ "$GIT_LOGS" == "" ]; then
-    git log origin/main..
+    git log $(git merge-base HEAD origin/main)..HEAD
   else
     echo "$GIT_LOGS"
   fi
 }
 
-BREAKING_CHANGES="$(get_logs | grep "^\s*BREAKING CHANGE:")"
-MINOR_CHANGES="$(get_logs | grep "^\s*feat[(:]")"
-PATCH_CHANGES="$(get_logs | grep "^\s*fix[(:]")"
+GIT_LOGS="$(get_logs)"
+
+BREAKING_CHANGES="$(echo "$GIT_LOGS" | grep "^\s*BREAKING CHANGE:")"
+MINOR_CHANGES="$(echo "$GIT_LOGS" | grep "^\s*feat[(:]")"
+PATCH_CHANGES="$(echo "$GIT_LOGS" | grep "^\s*fix[(:]")"
 
 function print_changes() {
   local title=$1
