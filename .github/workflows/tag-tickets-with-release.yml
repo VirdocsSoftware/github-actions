@@ -49,7 +49,6 @@ jobs:
             TARGET_BRANCH="${{ inputs.target-branch }}"
           fi
           COMMON_BRANCH=$(git merge-base $TARGET_BRANCH HEAD)
-          COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
           DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
           LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
           "
