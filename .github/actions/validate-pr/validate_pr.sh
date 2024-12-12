@@ -12,6 +12,10 @@ if [ "$LATEST_RELEASE" == "" ]; then
   echo "env variable LATEST_RELEASE is required"
   exit 1
 fi
+if [ "$PACKAGE_VERSION" == "" ]; then
+  echo "env variable PACKAGE_VERSION is required"
+  exit 1
+fi
 if [ "$TARGET_BRANCH" == "" ]; then
   echo "env variable TARGET_BRANCH is required"
   exit 1
@@ -31,4 +35,9 @@ if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
   exit 1
 fi
 
-# Add more validation logic as needed
+if [[ "$TARGET_BRANCH" == "main" ]]; then
+  if [[ ! "$PR_BRANCH" =~ ^feature/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
+    echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
+    exit 1
+  fi
+fi

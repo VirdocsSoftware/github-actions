@@ -21,6 +21,7 @@ beforeEach() {
   export PR_TITLE="feat: This is a PR title (ISSUE-1234)"
   export PR_BRANCH="feature/ISSUE-1234"
   export LATEST_RELEASE="1.0.0"
+  export PACKAGE_VERSION="1.1.0"
   export TARGET_BRANCH="develop"
 }
 
@@ -63,3 +64,17 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+
+echo Scenario: Invalid release branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="TICKET-123"
+export TARGET_BRANCH="main"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "1"
+expect "$ACTUAL" "PR branch must be release/v1.1.0 or hotfix/v1.1.0"
