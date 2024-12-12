@@ -55,3 +55,5 @@ if [[ "$TARGET_BRANCH" == "main" ]]; then
     exit 1
   fi
 fi
+
+echo "PR title and branch name validation passed."

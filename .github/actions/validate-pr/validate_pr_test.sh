@@ -77,6 +77,7 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+expect "PR title and branch name validation passed." "$ACTUAL"
 
 echo Scenario: Non release or hotfix branch targeting the main branch
 beforeEach
