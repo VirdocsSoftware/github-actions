@@ -1,0 +1,19 @@
+name: 'Validate PR'
+description: 'Validate PR title and branch'
+inputs:
+  pr_title:
+    description: 'The title of the pull request'
+    required: true
+    type: string
+  pr_branch:
+    description: 'The branch name of the pull request'
+    required: true
+    type: string
+  latest_release:
+    description: 'The latest release version'
+    required: true
+    type: string
+runs:
+  using: 'docker'
+  image: 'ubuntu:latest'
+  entrypoint: ['/validate_pr.sh']

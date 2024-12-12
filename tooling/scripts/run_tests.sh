@@ -17,4 +17,10 @@ function run_tests() {
 done
 }
 
+function validate_tests() {
+  set -e
+  ./.github/actions/validate-pr/validate_pr_test.sh
+}
+
+validate_tests
 run_tests "$FILES"
