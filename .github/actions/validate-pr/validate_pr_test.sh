@@ -52,3 +52,14 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 expect "$?" "1"
 expect "$ACTUAL" "PR title must include a Jira ticket number (e.g., ISSUE-1234)."
 
+echo Scenario: Valid PR title for feature branch
+beforeEach
+
+# GIVEN
+export PR_TITLE="feat: This is a PR title (ISSUE-1234)"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
