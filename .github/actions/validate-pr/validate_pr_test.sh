@@ -26,7 +26,7 @@ beforeEach() {
 
 beforeAll
 
-echo Scenario: Invalid PR title for feature branch
+echo Scenario: PR title missing semantic prefix for feature branch
 beforeEach
 
 # GIVEN
@@ -39,4 +39,16 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 expect "$?" "1"
 expect "$ACTUAL" "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
 
+echo Scenario: PR title missing Jira ticket for feature branch
+beforeEach
+
+# GIVEN
+export PR_TITLE="feat: This is a PR title"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "1"
+expect "$ACTUAL" "PR title must include a Jira ticket number (e.g., ISSUE-1234)."
 

@@ -26,4 +26,9 @@ if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
   exit 1
 fi
 
+if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
+  echo "PR title must include a Jira ticket number (e.g., ISSUE-1234)."
+  exit 1
+fi
+
 # Add more validation logic as needed
