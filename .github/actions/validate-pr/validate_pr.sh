@@ -1,4 +1,4 @@
-#!/bin/sh -l
+#!/bin/bash
 
 if [ "$PR_TITLE" == "" ]; then
   echo "env variable PR_TITLE is required"
