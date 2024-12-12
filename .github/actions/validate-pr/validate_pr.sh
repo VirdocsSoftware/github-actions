@@ -36,6 +36,17 @@ if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
 fi
 
 if [[ "$TARGET_BRANCH" == "main" ]]; then
+  if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
+    if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
+      echo "PR branch and package version must match"
+      exit 1
+    else
+      exit 0
+    fi
+  else
+    echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
+    exit 1
+  fi
   if [[ ! "$PR_BRANCH" =~ ^feature/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
     echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1

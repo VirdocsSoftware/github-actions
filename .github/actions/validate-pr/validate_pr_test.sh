@@ -65,7 +65,7 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "0"
 
-echo Scenario: Invalid release branch
+echo Scenario: Non release or hotfix branch targeting the main branch
 beforeEach
 
 # GIVEN
@@ -78,3 +78,18 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "1"
 expect "$ACTUAL" "PR branch must be release/v1.1.0 or hotfix/v1.1.0"
+
+echo Scenario: Package version and branch name mismatch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="release/v1.1.0"
+export TARGET_BRANCH="main"
+export PACKAGE_VERSION="1.0.0"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "1"
+expect "$ACTUAL" "PR branch and package version must match"
