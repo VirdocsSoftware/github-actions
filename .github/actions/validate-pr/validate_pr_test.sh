@@ -53,6 +53,19 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 expect "$?" "1"
 expect "$ACTUAL" "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
 
+echo Scenario: PR title missing Jira ticket for feature branch targeting hotfix branch
+beforeEach
+
+# GIVEN
+export PR_TITLE="feat: This is a PR title"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "1"
+expect "$ACTUAL" "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+
 echo Scenario: Valid PR title for feature branch
 beforeEach
 
@@ -122,12 +135,39 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "0"
 
+echo Scenario: Valid feature branch to release branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="feature/ISSUE-1234"
+export TARGET_BRANCH="release/v1.1.0"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+
+echo Scenario: Valid feature branch to hotfix branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="feature/ISSUE-1234"
+export TARGET_BRANCH="hotfix/v1.1.0"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+
 echo Scenario: Valid release branch to main branch
 beforeEach
 
 # GIVEN
 export PR_BRANCH="release/v1.1.0"
 export TARGET_BRANCH="main"
+export PR_TITLE="release v1.1.0 to main"
 
 # WHEN
 ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
@@ -141,6 +181,7 @@ beforeEach
 # GIVEN
 export PR_BRANCH="hotfix/v1.1.0"
 export TARGET_BRANCH="main"
+export PR_TITLE="hotfix v1.1.0 to main"
 
 # WHEN
 ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"

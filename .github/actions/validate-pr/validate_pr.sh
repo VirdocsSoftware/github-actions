@@ -25,14 +25,16 @@ SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test):"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
 
-if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
-  echo "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
-  exit 1
-fi
+if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] || [[ "$TARGET_BRANCH" =~ ^hotfix/v ]]; then
+  if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
+    echo "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
+    exit 1
+  fi
 
-if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
-  echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
-  exit 1
+  if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
+    echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+    exit 1
+  fi
 fi
 
 if [[ "$TARGET_BRANCH" == "main" ]]; then
