@@ -1,0 +1,71 @@
+name: Validate PR
+
+on:
+  workflow_call:
+    inputs:
+      pr_title:
+        description: "The title of the pull request."
+        type: string
+        required: true
+      pr_branch:
+        description: "The branch name of the pull request."
+        type: string
+        required: true
+      latest_release:
+        description: "The latest release version."
+        type: string
+        required: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Validate PR title and branch
+        run: |
+          PR_TITLE="${{ inputs.pr_title }}"
+          PR_BRANCH="${{ inputs.pr_branch }}"
+          LATEST_RELEASE="${{ inputs.latest_release }}"
+
+          SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test):"
+          JIRA_TICKET="([A-Z]+-[0-9]+)"
+          VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
+
+          if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
+            echo "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
+            exit 1
+          fi
+
+          if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
+            echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+            exit 1
+          fi
+
+          if [[ "$PR_BRANCH" =~ ^release\/ ]]; then
+              NEXT_VERSION="${PR_BRANCH#release/}"
+              if [[ ! "$NEXT_VERSION" =~ $VERSION_REGEX ]]; then
+                  echo "Release branch name must be in the format 'release/vX.Y.Z'."
+                  exit 1
+              fi
+              if [[ "$NEXT_VERSION" <= "$LATEST_RELEASE" ]]; then
+                  echo "Next predicted version must be higher than the latest release."
+                  exit 1
+              fi
+          fi
+
+          if [[ "$PR_BRANCH" =~ ^hotfix\/ ]]; then
+              NEXT_VERSION="${PR_BRANCH#hotfix/}"
+              if [[ ! "$NEXT_VERSION" =~ $VERSION_REGEX ]]; then
+                  echo "Hotfix branch name must be in the format 'hotfix/vX.Y.Z'."
+                  exit 1
+              fi
+              if [[ "$NEXT_VERSION" <= "$LATEST_RELEASE" ]]; then
+                  echo "Next predicted version must be higher than the latest release."
+                  exit 1
+              fi
+          fi
+
+          echo "PR title and branch name validation passed."
+
