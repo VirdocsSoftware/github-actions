@@ -93,3 +93,42 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "1"
 expect "$ACTUAL" "PR branch and package version must match"
+
+echo Scenario: Valid feature branch to develop branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="feature/ISSUE-1234"
+export TARGET_BRANCH="develop"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+
+echo Scenario: Valid release branch to main branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="release/v1.1.0"
+export TARGET_BRANCH="main"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+
+echo Scenario: Valid hotfix branch to main branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="hotfix/v1.1.0"
+export TARGET_BRANCH="main"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
