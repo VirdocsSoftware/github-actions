@@ -51,7 +51,7 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR title must include a Jira ticket number (e.g., ISSUE-1234)."
+expect "$ACTUAL" "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
 
 echo Scenario: Valid PR title for feature branch
 beforeEach
@@ -93,6 +93,21 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "1"
 expect "$ACTUAL" "PR branch and package version must match"
+
+echo Scenario: Next Release version is not higher than the latest version
+beforeEach
+
+# GIVEN
+export PR_BRANCH="release/v1.0.0"
+export TARGET_BRANCH="main"
+export PACKAGE_VERSION="1.0.0"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "1"
+expect "$ACTUAL" "Next predicted version must be higher than the latest release."
 
 echo Scenario: Valid feature branch to develop branch
 beforeEach

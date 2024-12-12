@@ -31,7 +31,7 @@ if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
 fi
 
 if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
-  echo "PR title must include a Jira ticket number (e.g., ISSUE-1234)."
+  echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
   exit 1
 fi
 
@@ -40,14 +40,15 @@ if [[ "$TARGET_BRANCH" == "main" ]]; then
     if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
       echo "PR branch and package version must match"
       exit 1
-    else
-      exit 0
+    elif [[ "$(printf '%s\n' "$PACKAGE_VERSION" "$LATEST_RELEASE" | sort | tail -n1)" == "$LATEST_RELEASE" ]]; then
+      echo "Next predicted version must be higher than the latest release."
+      exit 1
     fi
   else
     echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1
   fi
-  if [[ ! "$PR_BRANCH" =~ ^feature/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
+  if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
     echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1
   fi

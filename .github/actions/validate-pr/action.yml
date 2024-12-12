@@ -13,7 +13,21 @@ inputs:
     description: 'The latest release version'
     required: true
     type: string
+  package_version:
+    description: 'The version of the package'
+    required: true
+    type: string
+  target_branch:
+    description: 'The target branch for the pull request'
+    required: true
+    type: string
 runs:
   using: 'docker'
   image: 'ubuntu:latest'
   entrypoint: ['/validate_pr.sh']
+  env:
+    PR_TITLE: ${{ inputs.pr_title }}
+    PR_BRANCH: ${{ inputs.pr_branch }}
+    LATEST_RELEASE: ${{ inputs.latest_release }}
+    PACKAGE_VERSION: ${{ inputs.package_version }}
+    TARGET_BRANCH: ${{ inputs.target_branch }}
