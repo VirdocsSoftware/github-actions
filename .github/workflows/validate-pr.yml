@@ -32,7 +32,7 @@ jobs:
       - name: Print github json
         run: echo "$JSON"
         env:
-          JSON: ${{ toJson(github) }}
+          JSON: ${{ toJson(inputs) }}
       - name: Validate PR title and branch
         uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@feat/CORE-1611-PR-hygiene-check-workflow
         with:
