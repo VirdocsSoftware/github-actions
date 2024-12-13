@@ -36,9 +36,9 @@ jobs:
       - name: Validate PR title and branch
         uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@feat/CORE-1611-PR-hygiene-check-workflow
         with:
-          pr_title: ${{ github.event.inputs.pr_title }}
-          pr_branch: ${{ github.event.inputs.pr_branch }}
+          pr_title: ${{ inputs.pr_title }}
+          pr_branch: ${{ inputs.pr_branch }}
           latest_release: ${{ env.LATEST_RELEASE }}
           package_version: ${{ env.PACKAGE_VERSION }}
-          target_branch: ${{ github.event.inputs.target_branch }}
+          target_branch: ${{ inputs.target_branch }}
 
