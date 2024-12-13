@@ -1,0 +1,44 @@
+name: Validate PR
+
+on:
+  workflow_call:
+    inputs:
+      pr_title:
+        description: "The title of the pull request."
+        type: string
+        required: true
+      pr_branch:
+        description: "The branch name of the pull request."
+        type: string
+        required: true
+      target_branch:
+        description: "The target branch for the pull request."
+        type: string
+        required: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Get Latest Release
+        uses: VirdocsSoftware/github-actions/.github/actions/predict-next-version@main
+      - name: Get Package
+        run: |
+          PACKAGE_VERSION=$(cat package.json | jq -r '.version')
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
+          echo "LATEST_RELEASE=$(cat latest_version.txt)" >> $GITHUB_ENV
+      - name: Print github json
+        run: echo "$JSON"
+        env:
+          JSON: ${{ toJson(inputs) }}
+      - name: Validate PR title and branch
+        uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@main
+        with:
+          pr_title: ${{ inputs.pr_title }}
+          pr_branch: ${{ inputs.pr_branch }}
+          latest_release: ${{ env.LATEST_RELEASE }}
+          package_version: ${{ env.PACKAGE_VERSION }}
+          target_branch: ${{ inputs.target_branch }}
+
