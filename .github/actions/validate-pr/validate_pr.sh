@@ -26,6 +26,10 @@ JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
 
 if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] || [[ "$TARGET_BRANCH" =~ ^hotfix/v ]]; then
+  if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
+    echo "PR title and branch name validation passed."
+    exit 0
+  fi
   if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
     echo "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
     exit 1

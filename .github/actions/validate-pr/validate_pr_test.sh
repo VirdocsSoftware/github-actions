@@ -189,3 +189,18 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+
+echo Scenario: Valid release branch merging to develop
+beforeEach
+
+# GIVEN
+export PR_BRANCH="release/v1.1.0"
+export TARGET_BRANCH="develop"
+export PR_TITLE="release v1.1.0 to develop"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+
