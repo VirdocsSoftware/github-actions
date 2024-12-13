@@ -11,6 +11,10 @@ on:
         description: "The branch name of the pull request."
         type: string
         required: true
+      target_branch:
+        description: "The target branch for the pull request."
+        type: string
+        required: true
 
 jobs:
   validate:
@@ -34,7 +38,7 @@ jobs:
         with:
           pr_title: ${{ github.event.inputs.pr_title }}
           pr_branch: ${{ github.event.inputs.pr_branch }}
-          latest_release: ${{ github.env.LATEST_RELEASE }}
-          package_version: ${{ github.env.PACKAGE_VERSION }}
+          latest_release: ${{ env.LATEST_RELEASE }}
+          package_version: ${{ env.PACKAGE_VERSION }}
           target_branch: ${{ github.event.inputs.target_branch }}
 
