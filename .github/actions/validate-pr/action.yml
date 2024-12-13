@@ -30,7 +30,7 @@ runs:
         bash ${{ github.action_path }}/validate_pr.sh
       shell: bash
       env:
-        JSON: ${{ toJson(github) }}
+        JSON: ${{ toJson(inputs) }}
         PR_TITLE: ${{ inputs.pr_title }}
         PR_BRANCH: ${{ inputs.pr_branch }}
         LATEST_RELEASE: ${{ inputs.latest_release }}
