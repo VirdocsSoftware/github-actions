@@ -25,6 +25,10 @@ jobs:
           PACKAGE_VERSION=$(cat package.json | jq -r '.version')
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
           echo "LATEST_RELEASE=$(cat latest_version.txt)" >> $GITHUB_ENV
+      - name: Print github json
+        run: echo "$JSON"
+        env:
+          JSON: ${{ toJson(github) }}
       - name: Validate PR title and branch
         uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@feat/CORE-1611-PR-hygiene-check-workflow
         with:
