@@ -25,9 +25,12 @@ runs:
   using: 'composite'
   steps:
     - id: composite
-      run: bash ${{ github.action_path }}/validate_pr.sh
+      run: |
+        echo "$JSON"
+        bash ${{ github.action_path }}/validate_pr.sh
       shell: bash
       env:
+        JSON: ${{ toJson(github) }}
         PR_TITLE: ${{ inputs.pr_title }}
         PR_BRANCH: ${{ inputs.pr_branch }}
         LATEST_RELEASE: ${{ inputs.latest_release }}
