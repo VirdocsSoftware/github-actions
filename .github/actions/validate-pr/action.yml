@@ -1,0 +1,38 @@
+name: 'Validate PR'
+description: 'Validate PR title and branch'
+inputs:
+  pr_title:
+    description: 'The title of the pull request'
+    required: true
+    type: string
+  pr_branch:
+    description: 'The branch name of the pull request'
+    required: true
+    type: string
+  latest_release:
+    description: 'The latest release version'
+    required: true
+    type: string
+  package_version:
+    description: 'The version of the package'
+    required: true
+    type: string
+  target_branch:
+    description: 'The target branch for the pull request'
+    required: true
+    type: string
+runs:
+  using: 'composite'
+  steps:
+    - id: composite
+      run: |
+        echo "$JSON"
+        bash ${{ github.action_path }}/validate_pr.sh
+      shell: bash
+      env:
+        JSON: ${{ toJson(inputs) }}
+        PR_TITLE: ${{ inputs.pr_title }}
+        PR_BRANCH: ${{ inputs.pr_branch }}
+        LATEST_RELEASE: ${{ inputs.latest_release }}
+        PACKAGE_VERSION: ${{ inputs.package_version }}
+        TARGET_BRANCH: ${{ inputs.target_branch }}
