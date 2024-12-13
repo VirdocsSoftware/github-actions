@@ -34,7 +34,7 @@ jobs:
         env:
           JSON: ${{ toJson(inputs) }}
       - name: Validate PR title and branch
-        uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@feat/CORE-1611-PR-hygiene-check-workflow
+        uses: VirdocsSoftware/github-actions/.github/actions/validate-pr@main
         with:
           pr_title: ${{ inputs.pr_title }}
           pr_branch: ${{ inputs.pr_branch }}
