@@ -21,8 +21,9 @@ if [ "$TARGET_BRANCH" == "" ]; then
   exit 1
 fi
 
-SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test):"
+SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
+NEGATIVE_COLON_PATTERN="$SEMANTIC_PREFIXES:\($JIRA_TICKET\)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
 
 if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] || [[ "$TARGET_BRANCH" =~ ^hotfix/v ]]; then
@@ -39,6 +40,12 @@ if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] |
     echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
     exit 1
   fi
+
+  if [[ "$PR_TITLE" =~ $NEGATIVE_COLON_PATTERN ]]; then
+    echo "PR title contain a colon on an invalid position"
+    exit 1
+  fi
+
 fi
 
 if [[ "$TARGET_BRANCH" == "main" ]]; then
