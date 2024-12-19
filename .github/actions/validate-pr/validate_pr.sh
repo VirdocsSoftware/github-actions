@@ -21,7 +21,7 @@ if [ "$TARGET_BRANCH" == "" ]; then
   exit 1
 fi
 
-SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)"
+SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)[(:]"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
 
