@@ -204,3 +204,16 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 # THEN
 expect "$?" "0"
 
+echo Scenario: Valid pr title for fix branch merging to develop
+beforeEach
+
+# GIVEN
+export PR_BRANCH="fix-PAR-2061-remove-unnecessary-message-types"
+export TARGET_BRANCH="develop"
+export PR_TITLE="fix(PAR-2061): Remove unnecessary message types"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
