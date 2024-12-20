@@ -107,7 +107,7 @@ function get_tickets_in_current_branch() {
   echo "Checking for tickets between $(get_current_branch) and $target_branch" >&2
   local ticket_info="$($TICKET_STATUS_PATH $(get_current_branch) $target_branch)"
   echo "$ticket_info" >&2
-  echo "$ticket_info" | grep -v '"Done"' | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
+  echo "$ticket_info" | grep -v '"Done"' | grep -v "Cancelled" | jq -r .url | sort | uniq | sed 's/https:\/\/'$JIRA_DOMAIN'\/browse\///g'
 }
 
 function existing_version() {
