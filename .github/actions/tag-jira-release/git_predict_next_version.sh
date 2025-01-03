@@ -30,7 +30,7 @@ git fetch
 
 function get_logs() {
   if [ "$GIT_LOGS" == "" ]; then
-    git log HEAD..$TARGET_BRANCH
+    git log $TARGET_BRANCH..HEAD
   else
     echo "$GIT_LOGS"
   fi

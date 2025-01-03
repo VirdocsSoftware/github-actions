@@ -20,7 +20,7 @@ if [ "$2" != "" ]; then
   TARGET_BRANCH=$2
 fi
 
-HASHES=$(git log $CURRENT_BRANCH..$TARGET_BRANCH --pretty=format:'%H')
+HASHES=$(git log $TARGET_BRANCH..$CURRENT_BRANCH --pretty=format:'%H')
 
 if [ ! -d ~/temp ]; then
   mkdir ~/temp
