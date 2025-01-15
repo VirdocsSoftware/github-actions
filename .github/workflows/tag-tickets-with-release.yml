@@ -52,9 +52,8 @@ jobs:
             TARGET_BRANCH="origin/main"
           fi
           echo "Finding the common branch between HEAD and ${TARGET_BRANCH}" >&2
-          COMMON_BRANCH=$(git merge-base HEAD ${TARGET_BRANCH})
-          echo "Retrieving the git log between ${COMMON_BRANCH} and HEAD" >&2
-          DIFF="$(git log --pretty=format:'%s' ${COMMON_BRANCH}..HEAD)"
+          echo "Retrieving the git log between ${TARGET_BRANCH} and HEAD" >&2
+          DIFF="$(git log --pretty=format:'%s' $TARGET_BRANCH..HEAD)"
           LLM_PROMPT_PREFIX="Create a fun release description in 100 characters or less in one line without identifiers for the following data:
           "
           LLM_PROMPT="$LLM_PROMPT_PREFIX$DIFF"

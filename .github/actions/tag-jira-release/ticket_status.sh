@@ -20,8 +20,7 @@ if [ "$2" != "" ]; then
   TARGET_BRANCH=$2
 fi
 
-COMMON_BRANCH=$(git merge-base $TARGET_BRANCH $CURRENT_BRANCH)
-HASHES=$(git log $COMMON_BRANCH..$CURRENT_BRANCH --pretty=format:'%H')
+HASHES=$(git log $TARGET_BRANCH..$CURRENT_BRANCH --pretty=format:'%H')
 
 if [ ! -d ~/temp ]; then
   mkdir ~/temp
