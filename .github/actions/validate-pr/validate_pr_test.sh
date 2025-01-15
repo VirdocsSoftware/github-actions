@@ -217,3 +217,18 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+
+echo Scenario: Next release version has double digit and current release version has single digit
+beforeEach
+
+# GIVEN
+export PR_BRANCH="release/v1.10.0"
+export TARGET_BRANCH="main"
+export PACKAGE_VERSION="1.10.0"
+export LATEST_RELEASE="1.9.0"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
