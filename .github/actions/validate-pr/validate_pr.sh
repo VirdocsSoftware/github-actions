@@ -21,6 +21,44 @@ if [ "$TARGET_BRANCH" == "" ]; then
   exit 1
 fi
 
+function compare_versions() {
+  local version1=$1
+  local version2=$2
+
+  if [[ $version1 == $version2 ]]; then
+    echo "0"
+    return
+  fi
+
+  local IFS=.
+  local i
+  local ver1=($version1)
+  local ver2=($version2)
+
+  # Fill empty fields in ver1 with zeros
+  for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do
+    ver1[i]=0
+  done
+
+  # Fill empty fields in ver2 with zeros
+  for ((i=${#ver2[@]}; i<${#ver1[@]}; i++)); do
+    ver2[i]=0
+  done
+
+  for ((i=0; i<${#ver1[@]}; i++)); do
+    if [[ ${ver1[i]} -lt ${ver2[i]} ]]; then
+      echo "-1"
+      return
+    elif [[ ${ver1[i]} -gt ${ver2[i]} ]]; then
+      echo "1"
+      return
+    fi
+  done
+
+  echo "0"
+}
+
+
 SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)[(:]"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
@@ -46,7 +84,7 @@ if [[ "$TARGET_BRANCH" == "main" ]]; then
     if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
       echo "PR branch and package version must match"
       exit 1
-    elif [[ "$(printf '%s\n' "$PACKAGE_VERSION" "$LATEST_RELEASE" | sort | tail -n1)" == "$LATEST_RELEASE" ]]; then
+    elif [ "$(compare_versions $PACKAGE_VERSION $LATEST_RELEASE)" != "1" ]; then
       echo "Next predicted version must be higher than the latest release."
       exit 1
     fi
