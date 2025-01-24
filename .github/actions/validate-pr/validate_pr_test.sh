@@ -106,7 +106,14 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR branch and package version must match"
+expect "$ACTUAL" "Error: Mismatch between the pull request branch and the package version.
+Details:
+- PR Branch: release/v1.1.0
+- Latest Release: 1.0.0
+- Package Version: 1.0.0
+Action: Update the PR branch name or package version to ensure consistency. 
+For more details on naming conventions, refer to our workflow documentation.
+See: https://virdocs.atlassian.net/wiki/x/AYAqHAE"
 
 echo Scenario: Next Release version is not higher than the latest version
 beforeEach

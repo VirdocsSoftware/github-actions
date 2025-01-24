@@ -82,7 +82,14 @@ fi
 if [[ "$TARGET_BRANCH" == "main" ]]; then
   if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
     if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
-      echo "PR branch and package version must match"
+      echo "Error: Mismatch between the pull request branch and the package version.
+Details:
+- PR Branch: $PR_BRANCH
+- Latest Release: $LATEST_RELEASE
+- Package Version: $PACKAGE_VERSION
+Action: Update the PR branch name or package version to ensure consistency. 
+For more details on naming conventions, refer to our workflow documentation.
+See: https://virdocs.atlassian.net/wiki/x/AYAqHAE"
       exit 1
     elif [ "$(compare_versions $PACKAGE_VERSION $LATEST_RELEASE)" != "1" ]; then
       echo "Next predicted version must be higher than the latest release."
