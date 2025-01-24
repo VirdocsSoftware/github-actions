@@ -1,4 +1,3 @@
-
 #!/bin/bash
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
@@ -38,7 +37,12 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
+expect "$ACTUAL" "Error: Invalid PR title format
+Details:
+- Current title: This is a PR title (ISSUE-1234)
+Action: Update the PR title to start with a valid semantic prefix
+Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
+Example: feat: Add new feature (ABC-123)"
 
 echo Scenario: PR title missing Jira ticket for feature branch
 beforeEach
@@ -51,7 +55,11 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+expect "$ACTUAL" "Error: Missing Jira ticket reference in PR title
+Details:
+- Current title: feat: This is a PR title
+Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
+Example: feat: Add new feature (ABC-123)"
 
 echo Scenario: PR title missing Jira ticket for feature branch targeting hotfix branch
 beforeEach
@@ -64,7 +72,11 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+expect "$ACTUAL" "Error: Missing Jira ticket reference in PR title
+Details:
+- Current title: feat: This is a PR title
+Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
+Example: feat: Add new feature (ABC-123)"
 
 echo Scenario: Valid PR title for feature branch
 beforeEach
@@ -91,7 +103,12 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR branch must be release/v1.1.0 or hotfix/v1.1.0"
+expect "$ACTUAL" "Error: Invalid branch name for main target
+Details:
+- Current branch: TICKET-123
+- Target branch: main
+Action: Only release or hotfix branches can be merged to main
+Expected format: release/v1.1.0 or hotfix/v1.1.0"
 
 echo Scenario: Package version and branch name mismatch
 beforeEach
@@ -106,7 +123,14 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "PR branch and package version must match"
+expect "$ACTUAL" "Error: Mismatch between the pull request branch and the package version.
+Details:
+- PR Branch: release/v1.1.0
+- Latest Release: 1.0.0
+- Package Version: 1.0.0
+Action: Update the PR branch name or package version to ensure consistency. 
+For more details on naming conventions, refer to our workflow documentation.
+See: https://virdocs.atlassian.net/wiki/x/AYAqHAE"
 
 echo Scenario: Next Release version is not higher than the latest version
 beforeEach
@@ -121,7 +145,13 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "1"
-expect "$ACTUAL" "Next predicted version must be higher than the latest release."
+expect "$ACTUAL" "Error: Invalid version increment
+Details:
+- Current version: 1.0.0
+- Latest release: 1.0.0
+Action: Update the package version to be higher than the latest release
+Example: If latest is 1.0.0, next version should be > 1.0.0 (e.g., 1.0.1, 1.1.0, 2.0.0)
+For version numbering guidelines, see: https://semver.org/"
 
 echo Scenario: Valid feature branch to develop branch
 beforeEach

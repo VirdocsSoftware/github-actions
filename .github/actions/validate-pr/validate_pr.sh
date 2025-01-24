@@ -1,23 +1,28 @@
 #!/bin/bash
 
 if [ "$PR_TITLE" == "" ]; then
-  echo "env variable PR_TITLE is required"
+  echo "Error: Missing required environment variable PR_TITLE
+Action: Please set the PR_TITLE environment variable."
   exit 1
 fi
 if [ "$PR_BRANCH" == "" ]; then
-  echo "env variable PR_BRANCH is required"
+  echo "Error: Missing required environment variable PR_BRANCH
+Action: Please set the PR_BRANCH environment variable."
   exit 1
 fi
 if [ "$LATEST_RELEASE" == "" ]; then
-  echo "env variable LATEST_RELEASE is required"
+  echo "Error: Missing required environment variable LATEST_RELEASE
+Action: Please set the LATEST_RELEASE environment variable."
   exit 1
 fi
 if [ "$PACKAGE_VERSION" == "" ]; then
-  echo "env variable PACKAGE_VERSION is required"
+  echo "Error: Missing required environment variable PACKAGE_VERSION
+Action: Please set the PACKAGE_VERSION environment variable."
   exit 1
 fi
 if [ "$TARGET_BRANCH" == "" ]; then
-  echo "env variable TARGET_BRANCH is required"
+  echo "Error: Missing required environment variable TARGET_BRANCH
+Action: Please set the TARGET_BRANCH environment variable."
   exit 1
 fi
 
@@ -69,12 +74,21 @@ if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] |
     exit 0
   fi
   if [[ ! "$PR_TITLE" =~ $SEMANTIC_PREFIXES ]]; then
-    echo "PR title must start with a valid semantic prefix (e.g., feat:, fix:)."
+    echo "Error: Invalid PR title format
+Details:
+- Current title: $PR_TITLE
+Action: Update the PR title to start with a valid semantic prefix
+Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
+Example: feat: Add new feature (ABC-123)"
     exit 1
   fi
 
   if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
-    echo "PR title must contain a valid Jira ticket ID (e.g., ABC-123)."
+    echo "Error: Missing Jira ticket reference in PR title
+Details:
+- Current title: $PR_TITLE
+Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
+Example: feat: Add new feature (ABC-123)"
     exit 1
   fi
 fi
@@ -82,18 +96,41 @@ fi
 if [[ "$TARGET_BRANCH" == "main" ]]; then
   if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
     if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
-      echo "PR branch and package version must match"
+      echo "Error: Mismatch between the pull request branch and the package version.
+Details:
+- PR Branch: $PR_BRANCH
+- Latest Release: $LATEST_RELEASE
+- Package Version: $PACKAGE_VERSION
+Action: Update the PR branch name or package version to ensure consistency. 
+For more details on naming conventions, refer to our workflow documentation.
+See: https://virdocs.atlassian.net/wiki/x/AYAqHAE"
       exit 1
     elif [ "$(compare_versions $PACKAGE_VERSION $LATEST_RELEASE)" != "1" ]; then
-      echo "Next predicted version must be higher than the latest release."
+      echo "Error: Invalid version increment
+Details:
+- Current version: $PACKAGE_VERSION
+- Latest release: $LATEST_RELEASE
+Action: Update the package version to be higher than the latest release
+Example: If latest is 1.0.0, next version should be > 1.0.0 (e.g., 1.0.1, 1.1.0, 2.0.0)
+For version numbering guidelines, see: https://semver.org/"
       exit 1
     fi
   else
-    echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
+    echo "Error: Invalid branch name for main target
+Details:
+- Current branch: $PR_BRANCH
+- Target branch: main
+Action: Only release or hotfix branches can be merged to main
+Expected format: release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1
   fi
   if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
-    echo "PR branch must be release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
+    echo "Error: Branch name does not match package version
+Details:
+- Current branch: $PR_BRANCH
+- Package version: $PACKAGE_VERSION
+Action: Rename branch to match package version
+Expected format: release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1
   fi
 fi
