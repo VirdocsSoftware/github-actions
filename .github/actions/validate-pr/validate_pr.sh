@@ -80,7 +80,7 @@ Details:
 Action: Update the PR title to start with a valid semantic prefix
 Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
 Example: feat: Add new feature (ABC-123)
-Note: You must push a new commit in order to update this validation result"
+Note: You must push a new commit to update this validation result"
     exit 1
   fi
 
