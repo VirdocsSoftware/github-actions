@@ -42,7 +42,8 @@ Details:
 - Current title: This is a PR title (ISSUE-1234)
 Action: Update the PR title to start with a valid semantic prefix
 Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
-Example: feat: Add new feature (ABC-123)"
+Example: feat: Add new feature (ABC-123)
+Note: You must push a new commit to update this validation result"
 
 echo Scenario: PR title missing Jira ticket for feature branch
 beforeEach
