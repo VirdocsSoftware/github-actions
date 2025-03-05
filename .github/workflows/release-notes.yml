@@ -9,6 +9,10 @@ on:
         description: "The JIRA domain to tag the release."
         type: string
         required: true
+      version:
+        description: "The version to tag the release."
+        type: string
+        required: false
     secrets:
       jira-username:
         description: "The JIRA username to tag the release."
@@ -27,7 +31,11 @@ jobs:
           fetch-depth: 0
       - name: Get Version
         run: |
-          echo "version=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
+          if [ -z "${{ inputs.version }}" ]; then
+            echo "version=$(cat package.json | jq -r '.version')" >> $GITHUB_ENV
+          else
+            echo "version=${{ inputs.version }}" >> $GITHUB_ENV
+          fi
       - name: Create Confluence Release Notes
         uses: VirdocsSoftware/github-actions/.github/actions/confluence-release-notes@main
         with:
