@@ -18,4 +18,4 @@ runs:
         echo "With the current working directory: $(pwd)"
         node ${{ github.action_path }}/scan_github_actions.js
       shell: bash
-      working-directory: ${{ inputs.path }}
+      working-directory: ${{ github.workspace }}${{ inputs.path }}
