@@ -1,0 +1,28 @@
+name: "S3 Cache Action"
+description: "Caches files/folders to an S3 bucket keyed by repository and cache key."
+
+inputs:
+  path:
+    description: "Path to the directory or file to cache"
+    required: true
+  key:
+    description: "A unique key for the cache"
+    required: true
+  s3-bucket:
+    description: "The name of the S3 bucket"
+    required: true
+  aws-access-key-id:
+    description: "AWS Access Key ID"
+    required: true
+  aws-secret-access-key:
+    description: "AWS Secret Access Key"
+    required: true
+  aws-region:
+    description: "AWS Region"
+    required: false
+    default: "us-east-1"
+
+runs:
+  using: "node22"
+  main: "dist/index.js"
+  post: "dist/post.js"
