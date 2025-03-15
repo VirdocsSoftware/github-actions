@@ -1,12 +1,6 @@
 name: "Static Analysis"
 description: "Runs static analysis on the code"
 
-inputs:
-  path:
-    description: "Path to the directory or file to analyze"
-    required: true
-    default: "."
-
 runs:
   using: "composite"
   steps:
@@ -18,4 +12,4 @@ runs:
         echo "With the current working directory: $(pwd)"
         node ${{ github.action_path }}/scan_github_actions.js
       shell: bash
-      working-directory: ${{ github.workspace }}${{ inputs.path }}
+      working-directory: ${{ github.workspace }}
