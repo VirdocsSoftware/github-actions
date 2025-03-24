@@ -1,6 +1,12 @@
 name: "Static Analysis"
 description: "Runs static analysis on the code"
 
+inputs:
+  ignored-accounts:
+    description: "Comma-separated list of accounts to ignore"
+    required: false
+    default: "actions,VirdocsSoftware"
+
 runs:
   using: "composite"
   steps:
@@ -13,3 +19,5 @@ runs:
         node ${{ github.action_path }}/scan_github_actions.js
       shell: bash
       working-directory: ${{ github.workspace }}
+      env:
+        IGNORED_ACCOUNTS: ${{ inputs.ignored-accounts }}
