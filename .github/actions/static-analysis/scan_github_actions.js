@@ -96,7 +96,8 @@ class DataProvider {
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
+const ignoredAccounts = (process.env.IGNORED_ACCOUNTS || '').split(',');
 
 const dataProvider = new DataProvider(fs, path);
-const staticAnalysis = new StaticAnalysis(dataProvider, process);
+const staticAnalysis = new StaticAnalysis(dataProvider, process, ignoredAccounts);
 staticAnalysis.run();
