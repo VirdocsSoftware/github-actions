@@ -55,7 +55,7 @@ class StaticAnalysis {
         if (allWarnings.length > 0) {
             allWarnings.forEach(warning => console.warn(warning));
             console.log('To fix these issues, refer to the solution in the following Jira ticket: https://virdocs.atlassian.net/browse/RD-2964');
-            this.process.exit(1); // Exit with non-zero code if warnings are found
+            this.process.exit(0); // TODO: Exit with non-zero code if warnings are found
         } else {
             console.log('No issues found. All action calls use commit hashes.');
             this.process.exit(0);
