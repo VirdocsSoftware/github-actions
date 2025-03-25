@@ -27,13 +27,12 @@ class StaticAnalysis {
 
     scanFile(filePath) {
         const content = this.dataProvider.readFile(filePath);
-        const regex = /uses:\s*[\w-]+\/[\w-]+@([\w-.]+)/g;
+        const regex = /uses:\s*([\w-]+\/[\w-]+)@([\w-.]+)/g;
         let match;
         let warnings = [];
         while ((match = regex.exec(content)) !== null) {
-            const ref = match[1];
-            // extract the account from the ref
-            const account = ref.split('/')[0];
+            const ref = match[2];
+            const account = match[1];
             console.log(`Account: ${account}`);
             if (this.ignoredAccounts.includes(account)) {
                 continue;
