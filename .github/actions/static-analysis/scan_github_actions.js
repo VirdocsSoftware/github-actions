@@ -3,7 +3,7 @@ class StaticAnalysis {
         this.dataProvider = dataProvider;
         this.process = process;
         this.ignoredAccounts = ignoredAccounts;
-    }
+        console.log(`Ignored accounts: ${this.ignoredAccounts}`);
 
     isCommitHash(ref) {
         return /^[0-9a-f]{40}$/.test(ref);
@@ -33,6 +33,7 @@ class StaticAnalysis {
             const ref = match[1];
             // extract the account from the ref
             const account = ref.split('/')[0];
+            console.log(`Account: ${account}`);
             if (this.ignoredAccounts.includes(account)) {
                 continue;
             }
