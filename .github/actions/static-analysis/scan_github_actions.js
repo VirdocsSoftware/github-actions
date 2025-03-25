@@ -32,7 +32,7 @@ class StaticAnalysis {
         let warnings = [];
         while ((match = regex.exec(content)) !== null) {
             const ref = match[2];
-            const account = match[1];
+            const account = match[1].split('/')[0];
             console.log(`Account: ${account}`);
             if (this.ignoredAccounts.includes(account)) {
                 continue;
