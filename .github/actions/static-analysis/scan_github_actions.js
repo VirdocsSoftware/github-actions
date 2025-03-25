@@ -1,7 +1,8 @@
 class StaticAnalysis {
-    constructor(dataProvider, process) {
+    constructor(dataProvider, process, ignoredAccounts = []) {
         this.dataProvider = dataProvider;
         this.process = process;
+        this.ignoredAccounts = ignoredAccounts;
     }
 
     isCommitHash(ref) {
@@ -25,11 +26,15 @@ class StaticAnalysis {
 
     scanFile(filePath) {
         const content = this.dataProvider.readFile(filePath);
-        const regex = /uses:\s*[\w-]+\/[\w-]+@([\w-.]+)/g;
+        const regex = /uses:\s*([\w-]+\/[\w-]+)@([\w-.]+)/g;
         let match;
         let warnings = [];
         while ((match = regex.exec(content)) !== null) {
-            const ref = match[1];
+            const ref = match[2];
+            const account = match[1].split('/')[0];
+            if (this.ignoredAccounts.includes(account)) {
+                continue;
+            }
             if (!this.isCommitHash(ref)) {
                 warnings.push(`Warning: In file ${filePath}, '${match[0]}' does not use a commit hash.`);
             }
@@ -90,7 +95,8 @@ class DataProvider {
 const fs = require('fs');
 const path = require('path');
 const process = require('process');
+const ignoredAccounts = (process.env.IGNORED_ACCOUNTS || '').split(',');
 
 const dataProvider = new DataProvider(fs, path);
-const staticAnalysis = new StaticAnalysis(dataProvider, process);
+const staticAnalysis = new StaticAnalysis(dataProvider, process, ignoredAccounts);
 staticAnalysis.run();
