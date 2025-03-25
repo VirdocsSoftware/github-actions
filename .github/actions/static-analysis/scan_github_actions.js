@@ -4,6 +4,7 @@ class StaticAnalysis {
         this.process = process;
         this.ignoredAccounts = ignoredAccounts;
         console.log(`Ignored accounts: ${this.ignoredAccounts}`);
+    }
 
     isCommitHash(ref) {
         return /^[0-9a-f]{40}$/.test(ref);
