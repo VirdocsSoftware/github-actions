@@ -125,25 +125,38 @@ class LayerDependencyAnalysis {
   }
 }
 
-// Example usage:
-const comparator = new PackageJsonDependencyComparator();
+function main() {
+  if (process.argv.length < 4) {
+    console.error('Usage: node layer_dependency_analysis.js <layer-package-json> <domains>');
+    process.exit(1);
+  }
 
-const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
+  console.log('Layer package.json:', process.argv[2]);
+  console.log('Domains:', process.argv[3]);
+  console.log('Current working directory:', process.cwd());
 
-const layerPackageJson =  fs.readFileSync(process.argv[2], 'utf8');
-const domains = JSON.parse(fs.readFileSync(process.argv[3], 'utf8')); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
+  // Example usage:
+  const comparator = new PackageJsonDependencyComparator();
 
-const domainPackageJsons = domains.filter(domain => domain.project != '.').include.map(domain => {
-  return {
-    project: domain.project,
-    packageJson: JSON.parse(fs.readFileSync(`./domains/${domain.project}/package.json`, 'utf8'))
-  };
-});
+  const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 
-// print the test plan
-console.log('Test plan:');
-console.log('Layer package.json:', layerPackageJson);
-console.log('Domains:', domains);
-console.log('Domain package.json:', domainPackageJsons);
+  const layerPackageJson = fs.readFileSync(process.argv[2], 'utf8');
+  const domains = JSON.parse(fs.readFileSync(process.argv[3], 'utf8')); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
-layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
+  const domainPackageJsons = domains.filter(domain => domain.project != '.').include.map(domain => {
+    return {
+      project: domain.project,
+      packageJson: JSON.parse(fs.readFileSync(`./domains/${domain.project}/package.json`, 'utf8'))
+    };
+  });
+
+  // print the test plan
+  console.log('Test plan:');
+  console.log('Layer package.json:', layerPackageJson);
+  console.log('Domains:', domains);
+  console.log('Domain package.json:', domainPackageJsons);
+
+  layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
+}
+
+main();
