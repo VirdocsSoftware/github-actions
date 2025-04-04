@@ -18,6 +18,7 @@ class PackageJsonDependencyComparator {
     // Get all dependencies from both files
     const deps1 = this._getAllDependencies(packageJson1);
     const deps2 = this._getAllDependencies(packageJson2);
+    console.log('Dependencies:', deps1, deps2);
 
     // Compare dependencies
     for (const [dep, version1] of Object.entries(deps1)) {
