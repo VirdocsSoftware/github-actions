@@ -10,12 +10,10 @@ inputs:
   layer-package-json:
     description: "Path to the layer package.json file"
     required: true
-    default: "package.json"
 
   domains:
     description: "Comma-separated list of domains to analyze"
     required: true
-    default: "domains"
 
 runs:
   using: "composite"
