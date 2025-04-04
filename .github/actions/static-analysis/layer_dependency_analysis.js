@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 class PackageJsonDependencyComparator {
   /**
    * Compares dependencies between two package.json files
