@@ -7,12 +7,23 @@ inputs:
     required: false
     default: "actions,VirdocsSoftware"
 
+  layer-package-json:
+    description: "Path to the layer package.json file"
+    required: true
+
+  domains:
+    description: "Comma-separated list of domains to analyze"
+    required: true
+
 runs:
   using: "composite"
   steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      continue-on-error: true
+
     - name: Scan workflow yml files
+      id: scan-workflows
       run: |
         echo "Running the following script: ${{ github.action_path }}/scan_github_actions.js"
         echo "With the current working directory: $(pwd)"
@@ -21,3 +32,21 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         IGNORED_ACCOUNTS: ${{ inputs.ignored-accounts }}
+      continue-on-error: true
+
+    - name: Run layer dependency analysis
+      id: layer-dependency-analysis
+      run: |
+        echo "Running layer dependency analysis script"
+        node ${{ github.action_path }}/layer_dependency_analysis.js "${{ inputs.layer-package-json }}" '${{ inputs.domains }}'
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      continue-on-error: true
+
+    - name: Check results
+      run: |
+        if [ "${{ steps.scan-workflows.outcome }}" != "success" ] || [ "${{ steps.layer-dependency-analysis.outcome }}" != "success" ]; then
+          echo "One or more steps failed"
+          exit 1
+        fi
+      shell: bash
