@@ -144,7 +144,7 @@ function main() {
   const layerPackageJson = fs.readFileSync(process.cwd() + '/' + process.argv[2], 'utf8');
   const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
-  const domainPackageJsons = domains.include.filter(domain => domain.project != '.').include.map(domain => {
+  const domainPackageJsons = domains.include.filter(domain => domain.project != '.').map(domain => {
     return {
       project: domain.project,
       packageJson: JSON.parse(fs.readFileSync(process.cwd() + '/domains/' + domain.project + '/package.json', 'utf8'))
