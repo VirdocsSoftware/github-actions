@@ -66,30 +66,30 @@ class PackageJsonDependencyComparator {
    * @returns {string} Formatted report
    */
   formatReport(report) {
-    let output = '';
+    let parts = [];
 
     if (report.mismatches.length > 0) {
-      output += '\nMismatched Dependencies:\n';
-      report.mismatches.forEach(({ dependency, version1, version2 }) => {
-        output += `- ${dependency}: ${version1} vs ${version2}\n`;
-      });
+      const mismatchItems = report.mismatches.map(({ dependency, version1, version2 }) => 
+        `${dependency}:${version1}vs${version2}`
+      ).join(', ');
+      parts.push(`Mismatched: [${mismatchItems}]`);
     }
 
     if (report.missingInFirst.length > 0) {
-      output += '\nDependencies Missing in First File:\n';
-      report.missingInFirst.forEach(({ dependency, version }) => {
-        output += `- ${dependency}: ${version}\n`;
-      });
+      const missingFirstItems = report.missingInFirst.map(({ dependency, version }) => 
+        `${dependency}:${version}`
+      ).join(', ');
+      parts.push(`Missing in First: [${missingFirstItems}]`);
     }
 
     if (report.missingInSecond.length > 0) {
-      output += '\nDependencies Missing in Second File:\n';
-      report.missingInSecond.forEach(({ dependency, version }) => {
-        output += `- ${dependency}: ${version}\n`;
-      });
+      const missingSecondItems = report.missingInSecond.map(({ dependency, version }) => 
+        `${dependency}:${version}`
+      ).join(', ');
+      parts.push(`Missing in Second: [${missingSecondItems}]`);
     }
 
-    return output || 'No differences found between package.json files.';
+    return parts.length > 0 ? parts.join(' | ') : 'No differences found between package.json files.';
   }
 }
 
@@ -114,7 +114,7 @@ class LayerDependencyAnalysis {
       console.log('Reports with mismatched dependencies:');
       reportsWithWarnings.forEach(report => {
         // output warning to github actions
-        console.log(`::warning file=${report.project}/package.json::"${this.comparator.formatReport(report.report)}"`);
+        console.log(`::warning file=${report.project}/package.json::${this.comparator.formatReport(report.report)}`);
       });
     } else {
       console.log('No mismatched dependencies found');
