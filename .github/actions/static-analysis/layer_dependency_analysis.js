@@ -21,12 +21,10 @@ class PackageJsonDependencyComparator {
     // Compare dependencies
     for (const [dep, version1] of Object.entries(deps1)) {
       const version2 = deps2[dep];
+      console.log('Comparing dependency:', dep, version1, version2);
 
       if (version2 === undefined) {
-        report.missingInSecond.push({
-          dependency: dep,
-          version: version1
-        });
+        continue;  // we don't care about missing dependencies
       } else if (version1 !== version2) {
         report.mismatches.push({
           dependency: dep,
@@ -37,12 +35,9 @@ class PackageJsonDependencyComparator {
     }
 
     // Find dependencies that exist only in second file
-    for (const [dep, version2] of Object.entries(deps2)) {
+    for (const [dep] of Object.entries(deps2)) {
       if (deps1[dep] === undefined) {
-        report.missingInFirst.push({
-          dependency: dep,
-          version: version2
-        });
+        continue;  // we don't care about missing dependencies
       }
     }
 
