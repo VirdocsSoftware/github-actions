@@ -128,13 +128,13 @@ const comparator = new PackageJsonDependencyComparator();
 
 const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 
-const layerPackageJson = require(process.argv[2]);
-const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
+const layerPackageJson =  fs.readFileSync(process.argv[2], 'utf8');
+const domains = JSON.parse(fs.readFileSync(process.argv[3], 'utf8')); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
 const domainPackageJsons = domains.filter(domain => domain.project != '.').include.map(domain => {
   return {
     project: domain.project,
-    packageJson: require(`./domains/${domain.project}/package.json`)
+    packageJson: JSON.parse(fs.readFileSync(`./domains/${domain.project}/package.json`, 'utf8'))
   };
 });
 
