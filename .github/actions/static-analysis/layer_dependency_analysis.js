@@ -138,7 +138,7 @@ function main() {
   const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 
   console.log('Reading layer package.json:', process.cwd() + '/' + process.argv[2]);
-  const layerPackageJson = fs.readFileSync(process.cwd() + '/' + process.argv[2], 'utf8');
+  const layerPackageJson = JSON.parse(fs.readFileSync(process.cwd() + '/' + process.argv[2], 'utf8'));
   const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
   const domainPackageJsons = domains.include.filter(domain => domain.project != '.').map(domain => {
