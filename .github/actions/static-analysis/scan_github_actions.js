@@ -44,18 +44,34 @@ class StaticAnalysis {
 
     run() {
         const workflowDir = this.dataProvider.path.join(this.process.cwd(), '.github', 'workflows');
-        if (!this.dataProvider.fileExists(workflowDir)) {
-            console.error(`Error: Directory ${workflowDir} does not exist.`);
-            this.process.exit(1);
-        }
-
-        const yamlFiles = this.findYamlFiles(workflowDir);
+        const domainsDir = this.dataProvider.path.join(this.process.cwd(), 'domains');
         let allWarnings = [];
 
-        yamlFiles.forEach(filePath => {
-            const warnings = this.scanFile(filePath);
-            allWarnings = allWarnings.concat(warnings);
-        });
+        // Scan .github/workflows directory if it exists
+        if (this.dataProvider.fileExists(workflowDir)) {
+            const yamlFiles = this.findYamlFiles(workflowDir);
+            yamlFiles.forEach(filePath => {
+                const warnings = this.scanFile(filePath);
+                allWarnings = allWarnings.concat(warnings);
+            });
+        }
+
+        // Scan domains/*/.github/**/*.yml files if domains directory exists
+        if (this.dataProvider.fileExists(domainsDir)) {
+            const domains = this.dataProvider.readDirectory(domainsDir);
+            domains.forEach(domain => {
+                const domainPath = this.dataProvider.path.join(domainsDir, domain);
+                const domainGithubPath = this.dataProvider.path.join(domainPath, '.github');
+                
+                if (this.dataProvider.fileExists(domainGithubPath)) {
+                    const yamlFiles = this.findYamlFiles(domainGithubPath);
+                    yamlFiles.forEach(filePath => {
+                        const warnings = this.scanFile(filePath);
+                        allWarnings = allWarnings.concat(warnings);
+                    });
+                }
+            });
+        }
 
         if (allWarnings.length > 0) {
             allWarnings.forEach(warning => console.warn(warning));
