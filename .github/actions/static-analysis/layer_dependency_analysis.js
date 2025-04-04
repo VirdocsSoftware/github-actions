@@ -13,6 +13,7 @@ class PackageJsonDependencyComparator {
       missingInFirst: [],
       missingInSecond: []
     };
+    console.log('Comparing dependencies:', packageJson1, packageJson2);
 
     // Get all dependencies from both files
     const deps1 = this._getAllDependencies(packageJson1);
@@ -150,7 +151,7 @@ function main() {
   console.log('Test plan:');
   console.log('Layer package.json:', layerPackageJson);
   console.log('Domains:', domains);
-  console.log('Domain package.json:', domainPackageJsons);
+  console.log('Domain package.json:', JSON.stringify(domainPackageJsons, null, 2));
 
   layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
 }
