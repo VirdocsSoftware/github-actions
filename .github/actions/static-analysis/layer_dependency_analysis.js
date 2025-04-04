@@ -72,7 +72,7 @@ class PackageJsonDependencyComparator {
       const mismatchItems = report.mismatches.map(({ dependency, version1, version2 }) => 
         `${dependency}:${version1}vs${version2}`
       ).join(', ');
-      parts.push(`Mismatched: [${mismatchItems}]`);
+      parts.push(`Mismatched against layer: [${mismatchItems}]`);
     }
 
     if (report.missingInFirst.length > 0) {
