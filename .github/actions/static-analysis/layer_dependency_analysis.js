@@ -140,8 +140,10 @@ function main() {
 
   const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 
-  const layerPackageJson = fs.readFileSync(process.argv[2], 'utf8');
-  const domains = JSON.parse(fs.readFileSync(process.argv[3], 'utf8')); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
+  console.log('Reading layer package.json:', process.cwd() + '/' + process.argv[2]);
+  const layerPackageJson = fs.readFileSync(process.cwd() + '/' + process.argv[2], 'utf8');
+  console.log('Reading domains:', process.cwd() + '/' + process.argv[3]);
+  const domains = JSON.parse(fs.readFileSync(process.cwd() + '/' + process.argv[3], 'utf8')); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
   const domainPackageJsons = domains.filter(domain => domain.project != '.').include.map(domain => {
     return {
