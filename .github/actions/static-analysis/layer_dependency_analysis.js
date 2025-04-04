@@ -140,4 +140,10 @@ const domainPackageJsons = domains.filter(domain => domain.project != '.').inclu
   };
 });
 
+// print the test plan
+console.log('Test plan:');
+console.log('Layer package.json:', layerPackageJson);
+console.log('Domains:', domains);
+console.log('Domain package.json:', domainPackageJsons);
+
 layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
