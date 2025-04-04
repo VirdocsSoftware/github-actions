@@ -114,7 +114,7 @@ class LayerDependencyAnalysis {
       console.log('Reports with mismatched dependencies:');
       reportsWithWarnings.forEach(report => {
         // output warning to github actions
-        console.log(`::warning file=${report.project}/package.json::${this.comparator.formatReport(report.report)}`);
+        console.log(`::warning file=${report.project}/package.json::"${this.comparator.formatReport(report.report)}"`);
       });
     } else {
       console.log('No mismatched dependencies found');
