@@ -19,7 +19,7 @@ class PackageJsonDependencyComparator {
     // Compare dependencies
     for (const [dep, version1] of Object.entries(deps1)) {
       const version2 = deps2[dep];
-      
+
       if (version2 === undefined) {
         report.missingInSecond.push({
           dependency: dep,
@@ -131,7 +131,7 @@ const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 const layerPackageJson = require(process.argv[2]);
 const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
-const domainPackageJsons = domains.include.map(domain => {
+const domainPackageJsons = domains.filter(domain => domain.project != '.').include.map(domain => {
   return {
     project: domain.project,
     packageJson: require(`./domains/${domain.project}/package.json`)
