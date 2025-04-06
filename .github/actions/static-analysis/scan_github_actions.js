@@ -44,21 +44,45 @@ class StaticAnalysis {
 
     run() {
         const workflowDir = this.dataProvider.path.join(this.process.cwd(), '.github', 'workflows');
-        if (!this.dataProvider.fileExists(workflowDir)) {
-            console.error(`Error: Directory ${workflowDir} does not exist.`);
-            this.process.exit(1);
-        }
-
-        const yamlFiles = this.findYamlFiles(workflowDir);
+        const domainsDir = this.dataProvider.path.join(this.process.cwd(), 'domains');
         let allWarnings = [];
 
-        yamlFiles.forEach(filePath => {
-            const warnings = this.scanFile(filePath);
-            allWarnings = allWarnings.concat(warnings);
-        });
+        // Scan .github/workflows directory if it exists
+        if (this.dataProvider.fileExists(workflowDir)) {
+            const yamlFiles = this.findYamlFiles(workflowDir);
+            yamlFiles.forEach(filePath => {
+                const warnings = this.scanFile(filePath);
+                allWarnings = allWarnings.concat(warnings);
+            });
+        }
+
+        // Scan domains/*/.github/**/*.yml files if domains directory exists
+        if (this.dataProvider.fileExists(domainsDir)) {
+            const domains = this.dataProvider.readDirectory(domainsDir);
+            domains.forEach(domain => {
+                const domainPath = this.dataProvider.path.join(domainsDir, domain);
+                const domainGithubPath = this.dataProvider.path.join(domainPath, '.github');
+                
+                if (this.dataProvider.fileExists(domainGithubPath)) {
+                    const yamlFiles = this.findYamlFiles(domainGithubPath);
+                    yamlFiles.forEach(filePath => {
+                        const warnings = this.scanFile(filePath);
+                        allWarnings = allWarnings.concat(warnings);
+                    });
+                }
+            });
+        }
 
         if (allWarnings.length > 0) {
-            allWarnings.forEach(warning => console.warn(warning));
+            allWarnings.forEach(warning => {
+                // Extract file path and line number if available
+                const fileMatch = warning.match(/In file (.*?),/);
+                const filePath = fileMatch ? fileMatch[1] : '';
+                const relativePath = filePath ? this.dataProvider.path.relative(this.process.cwd(), filePath) : '';
+                
+                // Output warning using GitHub's Workflow Commands
+                console.log(`::warning file=${relativePath}::${warning}`);
+            });
             console.log('To fix these issues, refer to the solution in the following Jira ticket: https://virdocs.atlassian.net/browse/RD-2964');
             this.process.exit(0); // TODO: Exit with non-zero code if warnings are found
         } else {
