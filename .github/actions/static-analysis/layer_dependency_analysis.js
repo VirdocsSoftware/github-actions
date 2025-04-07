@@ -69,21 +69,21 @@ class PackageJsonDependencyComparator {
     let parts = [];
 
     if (report.mismatches.length > 0) {
-      const mismatchItems = report.mismatches.map(({ dependency, version1, version2 }) => 
+      const mismatchItems = report.mismatches.map(({ dependency, version1, version2 }) =>
         `${dependency}:${version1}vs${version2}`
       ).join(', ');
       parts.push(`Mismatched against layer: [${mismatchItems}]`);
     }
 
     if (report.missingInFirst.length > 0) {
-      const missingFirstItems = report.missingInFirst.map(({ dependency, version }) => 
+      const missingFirstItems = report.missingInFirst.map(({ dependency, version }) =>
         `${dependency}:${version}`
       ).join(', ');
       parts.push(`Missing in First: [${missingFirstItems}]`);
     }
 
     if (report.missingInSecond.length > 0) {
-      const missingSecondItems = report.missingInSecond.map(({ dependency, version }) => 
+      const missingSecondItems = report.missingInSecond.map(({ dependency, version }) =>
         `${dependency}:${version}`
       ).join(', ');
       parts.push(`Missing in Second: [${missingSecondItems}]`);
@@ -142,11 +142,17 @@ function main() {
   const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
   const domainPackageJsons = domains.include.filter(domain => domain.project != '.').map(domain => {
-    return {
-      project: domain.project,
-      packageJson: JSON.parse(fs.readFileSync(process.cwd() + '/domains/' + domain.project + '/package.json', 'utf8'))
-    };
-  });
+    try {
+      const packageJson = JSON.parse(fs.readFileSync(process.cwd() + '/domains/' + domain.project + '/package.json', 'utf8'));
+      return {
+        project: domain.project,
+        packageJson
+      };
+    } catch (error) {
+      console.error('Error parsing package.json for domain:', domain.project, error);
+      return undefined;
+    }
+  }).filter(domain => domain !== undefined);
 
   // print the test plan
   console.log('Test plan:');
