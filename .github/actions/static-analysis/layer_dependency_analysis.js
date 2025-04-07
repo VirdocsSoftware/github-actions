@@ -13,17 +13,17 @@ class PackageJsonDependencyComparator {
       missingInFirst: [],
       missingInSecond: []
     };
-    console.log('Comparing dependencies:', packageJson1, packageJson2);
+    // console.log('Comparing dependencies:', packageJson1, packageJson2);
 
     // Get all dependencies from both files
     const deps1 = this._getAllDependencies(packageJson1);
     const deps2 = this._getAllDependencies(packageJson2);
-    console.log('Dependencies:', deps1, deps2);
+    // console.log('Dependencies:', deps1, deps2);
 
     // Compare dependencies
     for (const [dep, version1] of Object.entries(deps1)) {
       const version2 = deps2[dep];
-      console.log('Comparing dependency:', dep, version1, version2);
+      // console.log('Comparing dependency:', dep, version1, version2);
 
       if (version2 === undefined) {
         continue;  // we don't care about missing dependencies
@@ -158,7 +158,7 @@ function main() {
   console.log('Test plan:');
   console.log('Layer package.json:', layerPackageJson);
   console.log('Domains:', domains);
-  console.log('Domain package.json:', JSON.stringify(domainPackageJsons, null, 2));
+  // console.log('Domain package.json:', JSON.stringify(domainPackageJsons, null, 2));
 
   layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
 }
