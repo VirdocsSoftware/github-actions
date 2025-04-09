@@ -12,7 +12,7 @@ inputs:
     required: true
 
   domains:
-    description: "Comma-separated list of domains to analyze"
+    description: "JSON string containing domains to analyze (e.g. {\"include\": [{\"project\": \"domain1\"}, {\"project\": \"domain2\"}]})"
     required: true
 
 runs:
@@ -32,6 +32,7 @@ runs:
       working-directory: ${{ github.workspace }}
       env:
         IGNORED_ACCOUNTS: ${{ inputs.ignored-accounts }}
+        DOMAINS: ${{ inputs.domains }}
       continue-on-error: true
 
     - name: Run layer dependency analysis
