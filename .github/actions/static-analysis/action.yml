@@ -5,7 +5,7 @@ inputs:
   ignored-accounts:
     description: "Comma-separated list of accounts to ignore"
     required: false
-    default: "actions,VirdocsSoftware"
+    default: "actions,VirdocsSoftware,aws-actions"
 
   layer-package-json:
     description: "Path to the layer package.json file"
