@@ -1,8 +1,9 @@
 class StaticAnalysis {
-    constructor(dataProvider, process, ignoredAccounts = []) {
+    constructor(dataProvider, process, ignoredAccounts = [], domains = null) {
         this.dataProvider = dataProvider;
         this.process = process;
         this.ignoredAccounts = ignoredAccounts;
+        this.domains = domains;
     }
 
     isCommitHash(ref) {
@@ -58,8 +59,11 @@ class StaticAnalysis {
 
         // Scan domains/*/.github/**/*.yml files if domains directory exists
         if (this.dataProvider.fileExists(domainsDir)) {
-            const domains = this.dataProvider.readDirectory(domainsDir);
-            domains.forEach(domain => {
+            const domainsToScan = this.domains ? 
+                this.domains.include.filter(domain => domain.project !== '.').map(domain => domain.project) :
+                this.dataProvider.readDirectory(domainsDir);
+
+            domainsToScan.forEach(domain => {
                 const domainPath = this.dataProvider.path.join(domainsDir, domain);
                 const domainGithubPath = this.dataProvider.path.join(domainPath, '.github');
                 
@@ -120,7 +124,8 @@ const fs = require('fs');
 const path = require('path');
 const process = require('process');
 const ignoredAccounts = (process.env.IGNORED_ACCOUNTS || '').split(',');
+const domains = process.env.DOMAINS ? JSON.parse(process.env.DOMAINS) : null;
 
 const dataProvider = new DataProvider(fs, path);
-const staticAnalysis = new StaticAnalysis(dataProvider, process, ignoredAccounts);
+const staticAnalysis = new StaticAnalysis(dataProvider, process, ignoredAccounts, domains);
 staticAnalysis.run();
