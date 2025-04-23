@@ -41,7 +41,7 @@ expect "$ACTUAL" "Error: Invalid PR title format
 Details:
 - Current title: This is a PR title (ISSUE-1234)
 Action: Update the PR title to start with a valid semantic prefix
-Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
+Valid prefixes: feat:, fix:, chore:, ci:, docs:, style:, refactor:, perf:, test:
 Example: feat: Add new feature (ABC-123)
 Note: You must push a new commit to update this validation result"
 

@@ -64,7 +64,7 @@ function compare_versions() {
 }
 
 
-SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)[(:]"
+SEMANTIC_PREFIXES="^(feat|fix|chore|ci|docs|style|refactor|perf|test)[(:]"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
 
@@ -78,7 +78,7 @@ if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] |
 Details:
 - Current title: $PR_TITLE
 Action: Update the PR title to start with a valid semantic prefix
-Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
+Valid prefixes: feat:, fix:, chore:, ci:, docs:, style:, refactor:, perf:, test:
 Example: feat: Add new feature (ABC-123)
 Note: You must push a new commit to update this validation result"
     exit 1
