@@ -66,7 +66,7 @@ function compare_versions() {
 
 SEMANTIC_PREFIXES="^(feat|fix|chore|ci|docs|style|refactor|perf|test)[(:]"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
-VERSION_REGEX="^v([0-9]+)\.([0-9]+)\.([0-9]+)$"
+VERSION_REGEX="v([0-9]+)\.([0-9]+)\.([0-9]+)"
 
 if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] || [[ "$TARGET_BRANCH" =~ ^hotfix/v ]]; then
   if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
@@ -96,7 +96,8 @@ fi
 
 if [[ "$TARGET_BRANCH" == "main" ]]; then
   if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
-    if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
+    BASE_BRANCH_VERSION=$(echo "$PR_BRANCH" | grep -oE "v[0-9]+\.[0-9]+\.[0-9]+")
+    if [[ ! "$BASE_BRANCH_VERSION" =~ ^v$PACKAGE_VERSION ]] && [[ ! "$BASE_BRANCH_VERSION" =~ ^v$PACKAGE_VERSION ]]; then
       echo "Error: Mismatch between the pull request branch and the package version.
 Details:
 - PR Branch: $PR_BRANCH
@@ -125,7 +126,7 @@ Action: Only release or hotfix branches can be merged to main
 Expected format: release/v$PACKAGE_VERSION or hotfix/v$PACKAGE_VERSION"
     exit 1
   fi
-  if [[ ! "$PR_BRANCH" =~ ^release/v$PACKAGE_VERSION ]] && [[ ! "$PR_BRANCH" =~ ^hotfix/v$PACKAGE_VERSION ]]; then
+  if [[ ! "$BASE_BRANCH_VERSION" =~ ^v$PACKAGE_VERSION ]] && [[ ! "$BASE_BRANCH_BRANCH" =~ ^v$PACKAGE_VERSION ]]; then
     echo "Error: Branch name does not match package version
 Details:
 - Current branch: $PR_BRANCH
