@@ -263,3 +263,19 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+
+echo Scenario: Valid hotfix branch with suffix to main branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="hotfix/v1.2.3-ar"
+export TARGET_BRANCH="main"
+export PACKAGE_VERSION="1.2.3"
+export LATEST_RELEASE="1.2.2"
+export PR_TITLE="hotfix v1.2.3 to main"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
