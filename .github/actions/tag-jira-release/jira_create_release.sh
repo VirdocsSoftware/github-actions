@@ -40,10 +40,15 @@ function next_release_date() {
   current_day=$($DATE_PATH +%u)
 
   # Calculate days until next target day
-  if [ "$current_day" -ge "$target_day" ]; then
-    days_until_target_day=$(( 7 + ($target_day + 7 - $current_day) % 7 ))
+  if [ "$current_day" -eq 5 ]; then
+      # If today is Friday, set release to Monday (3 days later)
+      days_until_target_day=$(( 3 ))
+  elif [ "$current_day" -ge 6 ]; then
+      # If today is Saturday (6) or Sunday (0), set release to Monday
+      days_until_target_day=$(( (8 - $current_day) % 7 ))
   else
-    days_until_target_day=$(( ($target_day - $current_day) % 7 ))
+      # Otherwise, release the next day
+      days_until_target_day=1
   fi
 
   # Get the date of next target day in YYYY-MM-DD format
