@@ -1,6 +1,6 @@
 {
   "name": "github-actions",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "description": "Used to store GitHub actions for use across the enterprise",
   "scripts": {
     "test": "./tooling/scripts/run_tests.sh",
