@@ -50,7 +50,7 @@ function getTicketInfo() {
 
 function hasSkipReleaseNotes() {
   commitHash=$1
-  LOG=$($GIT_CMD show $commitHash | sed '/^diff/,$d')
+  LOG=$(git show $commitHash | sed '/^diff/,$d')
   if [[ "$LOG" =~ \[skip-release-notes\] ]]; then
     echo -n ",\"skip-release-notes\":true"
   fi
