@@ -48,6 +48,14 @@ function getTicketInfo() {
   fi
 }
 
+function hasSkipReleaseNotes() {
+  commitHash=$1
+  LOG=$(git show $commitHash | sed '/^diff/,$d')
+  if [[ "$LOG" =~ \[skip-release-notes\] ]]; then
+    echo -n ",\"skip-release-notes\":true"
+  fi
+}
+
 while IFS= read -r hash; do
   FILE=~/temp/$hash.txt
   if [ -f "$FILE" ]; then
@@ -55,6 +63,7 @@ while IFS= read -r hash; do
       if [ "$ticketId" != "" ]; then
         echo -n "{\"hash\":\"$hash\","
         getTicketInfo $ticketId
+        hasSkipReleaseNotes $hash
         echo "}"
       fi
     done <<< "$(cat $FILE | sed 's/ /\n/g')"
