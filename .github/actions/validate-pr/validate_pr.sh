@@ -68,6 +68,11 @@ SEMANTIC_PREFIXES="^(feat|fix|chore|ci|docs|style|refactor|perf|test)[(:]"
 JIRA_TICKET="([A-Z]+-[0-9]+)"
 VERSION_REGEX="v([0-9]+)\.([0-9]+)\.([0-9]+)"
 
+if [ "$PR_BRANCH" == "main" ] && [ "$TARGET_BRANCH" == "develop" ]; then
+  echo "Everything is good"
+  exit 0
+fi
+
 if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] || [[ "$TARGET_BRANCH" =~ ^hotfix/v ]]; then
   if [[ "$PR_BRANCH" =~ ^release/v ]] || [[ "$PR_BRANCH" =~ ^hotfix/v ]]; then
     echo "PR title and branch name validation passed."
