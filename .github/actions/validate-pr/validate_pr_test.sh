@@ -279,3 +279,19 @@ ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
 
 # THEN
 expect "$?" "0"
+
+echo Scenario: Valid main branch to develop branch
+beforeEach
+
+# GIVEN
+export PR_BRANCH="main"
+export TARGET_BRANCH="develop"
+export PACKAGE_VERSION="1.18.2"
+export LATEST_VERSION="1.18.2"
+export PR_TITLE="chore: sync main (v1.18.2) to develop"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
