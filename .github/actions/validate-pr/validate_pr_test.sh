@@ -42,48 +42,31 @@ Details:
 - Current title: This is a PR title (ISSUE-1234)
 Action: Update the PR title to start with a valid semantic prefix
 Valid prefixes: feat:, fix:, chore:, ci:, docs:, style:, refactor:, perf:, test:
-Example: feat: Add new feature (ABC-123)
+Examples: 
+  feat(ABC-123): Add new feature 
+  docs: correct misspelling in readme 
 Note: You must push a new commit to update this validation result"
 
-echo Scenario: PR title missing Jira ticket for feature branch
-beforeEach
 
-# GIVEN
-export PR_TITLE="feat: This is a PR title"
-
-# WHEN
-ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
-
-# THEN
-expect "$?" "1"
-expect "$ACTUAL" "Error: Missing Jira ticket reference in PR title
-Details:
-- Current title: feat: This is a PR title
-Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
-Example: feat: Add new feature (ABC-123)"
-
-echo Scenario: PR title missing Jira ticket for feature branch targeting hotfix branch
-beforeEach
-
-# GIVEN
-export PR_TITLE="feat: This is a PR title"
-
-# WHEN
-ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
-
-# THEN
-expect "$?" "1"
-expect "$ACTUAL" "Error: Missing Jira ticket reference in PR title
-Details:
-- Current title: feat: This is a PR title
-Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
-Example: feat: Add new feature (ABC-123)"
 
 echo Scenario: Valid PR title for feature branch
 beforeEach
 
 # GIVEN
 export PR_TITLE="feat: This is a PR title (ISSUE-1234)"
+
+# WHEN
+ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
+
+# THEN
+expect "$?" "0"
+expect "PR title and branch name validation passed." "$ACTUAL"
+
+echo Scenario: Valid PR title without Jira ticket for feature branch
+beforeEach
+
+# GIVEN
+export PR_TITLE="feat: This is a PR title without ticket"
 
 # WHEN
 ACTUAL="$($SCRIPT_DIR/validate_pr.sh)"
