@@ -1,0 +1,21 @@
+{
+  "name": "auto-pr-description",
+  "version": "1.0.0",
+  "description": "GitHub Action to automatically generate PR descriptions using AI",
+  "main": "generate_pr_description.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "github-action",
+    "pull-request",
+    "ai",
+    "gemini",
+    "automation"
+  ],
+  "author": "RedShelf",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
