@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         git fetch origin ${{ inputs.base-sha }} --depth=1
-        git diff ${{ inputs.base-sha }}...${{ inputs.head-sha }} > pr.diff
+        git diff ${{ inputs.base-sha }}... > pr.diff
         echo "Generated diff file with $(wc -l < pr.diff) lines"
     
     - name: Generate PR description
