@@ -1,0 +1,96 @@
+name: Auto PR Description Generator
+description: Automatically generate pull request descriptions using AI based on git diff
+inputs:
+  gemini-api-key:
+    description: 'The API key for the Gemini API'
+    required: true
+  github-token:
+    description: 'GitHub token for PR operations'
+    required: true
+  pr-number:
+    description: 'Pull request number'
+    required: true
+  jira-ticket-url-prefix:
+    description: 'JIRA ticket URL prefix (e.g., https://company.atlassian.net/browse/)'
+    required: false
+    default: 'https://virdocs.atlassian.net/browse/'
+outputs:
+  description:
+    description: 'The generated PR description'
+    value: ${{ steps.generate_description.outputs.description }}
+  updated:
+    description: 'Whether the PR description was updated'
+    value: ${{ steps.update_pr.outputs.updated }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22.x'
+    
+    - name: Install dependencies
+      shell: bash
+      run: |
+        npm install
+      working-directory: ${{ github.action_path }}
+    
+    - name: Generate PR diff from GitHub
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        # Get the PR diff directly from GitHub using gh CLI
+        gh pr diff ${{ inputs.pr-number }} > pr.diff
+        echo "Generated diff file with $(wc -l < pr.diff) lines"
+    
+    - name: Generate PR description
+      id: generate_description
+      shell: bash
+      env:
+        GEMINI_API_KEY: ${{ inputs.gemini-api-key }}
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+        JIRA_TICKET_URL_PREFIX: ${{ inputs.jira-ticket-url-prefix }}
+      run: |
+        # Generate description using AI
+        DESCRIPTION=$(node ${{ github.action_path }}/generate_pr_description.js pr.diff)
+        
+        # Get existing PR body to check for images
+        FIRST_LINE=$(gh pr view ${{ inputs.pr-number }} --json body --jq '.body' | head -n 1)
+        
+        # Preserve images if they exist at the beginning
+        if echo "$FIRST_LINE" | grep -qE '^(<img[^>]*>[[:space:]]*|!\[[^]]*\]\([^)]*\))$'; then
+          printf '%s\n\n%s\n' "$FIRST_LINE" "$DESCRIPTION" > pr_body.md
+        else
+          printf '%s\n' "$DESCRIPTION" > pr_body.md
+        fi
+        
+        # Add JIRA ticket link if found
+        PR_TITLE=$(gh pr view ${{ inputs.pr-number }} --json title --jq '.title')
+        TICKET_ID=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' || true)
+        if [ -z "$TICKET_ID" ]; then
+          TICKET_ID=$(echo "$GITHUB_HEAD_REF" | grep -oE '[A-Z]+-[0-9]+' || true)
+        fi
+        if [ -n "$TICKET_ID" ]; then
+          TICKET_URL="${{ inputs.jira-ticket-url-prefix }}${TICKET_ID}"
+          printf '\n## Ticket\n%s\n' "$TICKET_URL" >> pr_body.md
+        fi
+        
+        # Output the description for other steps to use
+        echo "description<<EOF" >> $GITHUB_OUTPUT
+        cat pr_body.md >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Update PR description
+      id: update_pr
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
+      run: |
+        gh pr edit ${{ inputs.pr-number }} --body-file pr_body.md
+        echo "updated=true" >> $GITHUB_OUTPUT
+        echo "Successfully updated PR #${{ inputs.pr-number }} description"
