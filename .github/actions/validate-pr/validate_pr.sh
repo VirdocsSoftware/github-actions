@@ -64,8 +64,7 @@ function compare_versions() {
 }
 
 
-SEMANTIC_PREFIXES="^(feat|fix|chore|docs|style|refactor|perf|test)[(:]"
-JIRA_TICKET="([A-Z]+-[0-9]+)"
+SEMANTIC_PREFIXES="^(feat|fix|chore|ci|docs|style|refactor|perf|test)[(:]"
 VERSION_REGEX="v([0-9]+)\.([0-9]+)\.([0-9]+)"
 
 if [ "$PR_BRANCH" == "main" ] && [ "$TARGET_BRANCH" == "develop" ]; then
@@ -83,18 +82,11 @@ if [[ "$TARGET_BRANCH" == "develop" ]] || [[ "$TARGET_BRANCH" =~ ^release/v ]] |
 Details:
 - Current title: $PR_TITLE
 Action: Update the PR title to start with a valid semantic prefix
-Valid prefixes: feat:, fix:, chore:, docs:, style:, refactor:, perf:, test:
-Example: feat: Add new feature (ABC-123)
+Valid prefixes: feat:, fix:, chore:, ci:, docs:, style:, refactor:, perf:, test:
+Examples: 
+  feat(ABC-123): Add new feature 
+  docs: correct misspelling in readme 
 Note: You must push a new commit to update this validation result"
-    exit 1
-  fi
-
-  if [[ ! "$PR_TITLE" =~ $JIRA_TICKET ]]; then
-    echo "Error: Missing Jira ticket reference in PR title
-Details:
-- Current title: $PR_TITLE
-Action: Include a Jira ticket ID in the PR title using the format (ABC-123)
-Example: feat: Add new feature (ABC-123)"
     exit 1
   fi
 fi
