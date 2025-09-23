@@ -98,8 +98,10 @@ class LayerDependencyAnalysis {
     this.comparator = comparator;
   }
 
-  run(layerPackageJson, domainPackageJsons) {
-    console.log('Running layer dependency analysis');
+  run(layerPackageJson, domainPackageJsons, outputFormat = 'console') {
+    if (outputFormat !== 'json') {
+      console.log('Running layer dependency analysis');
+    }
 
     const reports = domainPackageJsons.map(domainPackageJson => {
       return {
@@ -110,36 +112,66 @@ class LayerDependencyAnalysis {
 
     const reportsWithWarnings = reports.filter(report => report.report.mismatches.length > 0);
 
-    if (reportsWithWarnings.length > 0) {
-      console.log('Reports with mismatched dependencies:');
-      reportsWithWarnings.forEach(report => {
-        // output warning to github actions
-        console.log(`::warning file=${report.project}/package.json::${this.comparator.formatReport(report.report)}`);
-      });
+    if (outputFormat === 'json') {
+      // Output structured JSON data for piping to other scripts
+      const jsonOutput = {
+        timestamp: new Date().toISOString(),
+        layerPackageJson: layerPackageJson.name || 'unknown',
+        totalDomainsAnalyzed: domainPackageJsons.length,
+        domainsWithMismatches: reportsWithWarnings.length,
+        reports: reports.map(report => ({
+          project: report.project,
+          hasMismatches: report.report.mismatches.length > 0,
+          mismatches: report.report.mismatches,
+          missingInFirst: report.report.missingInFirst,
+          missingInSecond: report.report.missingInSecond,
+          formattedReport: this.comparator.formatReport(report.report)
+        }))
+      };
+      
+      console.log(JSON.stringify(jsonOutput, null, 2));
     } else {
-      console.log('No mismatched dependencies found');
+      // Original console output behavior
+      if (reportsWithWarnings.length > 0) {
+        console.log('Reports with mismatched dependencies:');
+        reportsWithWarnings.forEach(report => {
+          // output warning to github actions
+          console.log(`::warning file=${report.project}/package.json::${this.comparator.formatReport(report.report)}`);
+        });
+      } else {
+        console.log('No mismatched dependencies found');
+      }
     }
   }
 }
 
 function main() {
-  if (process.argv.length < 4) {
-    console.error('Usage: node layer_dependency_analysis.js <layer-package-json> <domains>');
+  const args = process.argv.slice(2);
+  const jsonOutput = args.includes('--json');
+  const filteredArgs = args.filter(arg => arg !== '--json');
+
+  if (filteredArgs.length < 2) {
+    console.error('Usage: node layer_dependency_analysis.js [--json] <layer-package-json> <domains>');
+    console.error('  --json: Output structured JSON data instead of console warnings');
     process.exit(1);
   }
 
-  console.log('Layer package.json:', process.argv[2]);
-  console.log('Domains:', process.argv[3]);
-  console.log('Current working directory:', process.cwd());
+  if (!jsonOutput) {
+    console.log('Layer package.json:', filteredArgs[0]);
+    console.log('Domains:', filteredArgs[1]);
+    console.log('Current working directory:', process.cwd());
+  }
 
   // Example usage:
   const comparator = new PackageJsonDependencyComparator();
 
   const layerDependencyAnalysis = new LayerDependencyAnalysis(comparator);
 
-  console.log('Reading layer package.json:', process.cwd() + '/' + process.argv[2]);
-  const layerPackageJson = JSON.parse(fs.readFileSync(process.cwd() + '/' + process.argv[2], 'utf8'));
-  const domains = JSON.parse(process.argv[3]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
+  if (!jsonOutput) {
+    console.log('Reading layer package.json:', process.cwd() + '/' + filteredArgs[0]);
+  }
+  const layerPackageJson = JSON.parse(fs.readFileSync(process.cwd() + '/' + filteredArgs[0], 'utf8'));
+  const domains = JSON.parse(filteredArgs[1]); // {"include": [{"project": "domain1"}, {"project": "domain2"}]}
 
   const domainPackageJsons = domains.include.filter(domain => domain.project != '.').map(domain => {
     try {
@@ -149,18 +181,22 @@ function main() {
         packageJson
       };
     } catch (error) {
-      console.error('Error parsing package.json for domain:', domain.project, error);
+      if (!jsonOutput) {
+        console.error('Error parsing package.json for domain:', domain.project, error);
+      }
       return undefined;
     }
   }).filter(domain => domain !== undefined);
 
   // print the test plan
-  console.log('Test plan:');
-  console.log('Layer package.json:', layerPackageJson);
-  console.log('Domains:', domains);
-  // console.log('Domain package.json:', JSON.stringify(domainPackageJsons, null, 2));
+  if (!jsonOutput) {
+    console.log('Test plan:');
+    console.log('Layer package.json:', layerPackageJson);
+    console.log('Domains:', domains);
+    // console.log('Domain package.json:', JSON.stringify(domainPackageJsons, null, 2));
+  }
 
-  layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons);
+  layerDependencyAnalysis.run(layerPackageJson, domainPackageJsons, jsonOutput ? 'json' : 'console');
 }
 
 main();
