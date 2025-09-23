@@ -21,8 +21,6 @@ A reusable GitHub Action that automatically generates pull request descriptions 
     gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
     github-token: ${{ secrets.GITHUB_TOKEN }}
     pr-number: ${{ github.event.pull_request.number }}
-    base-sha: ${{ github.event.pull_request.base.sha }}
-    head-sha: ${{ github.event.pull_request.head.sha }}
 ```
 
 ### Complete Workflow Example
@@ -48,8 +46,6 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       
       - name: Generate PR Description
         uses: ./.github/actions/auto-pr-description
@@ -57,8 +53,6 @@ jobs:
           gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-number: ${{ github.event.pull_request.number }}
-          base-sha: ${{ github.event.pull_request.base.sha }}
-          head-sha: ${{ github.event.pull_request.head.sha }}
           jira-ticket-url-prefix: 'https://yourcompany.atlassian.net/browse/'
 ```
 
@@ -69,8 +63,6 @@ jobs:
 | `gemini-api-key` | The API key for the Gemini API | ✅ | - |
 | `github-token` | GitHub token for PR operations | ✅ | - |
 | `pr-number` | Pull request number | ✅ | - |
-| `base-sha` | Base commit SHA for diff comparison | ✅ | - |
-| `head-sha` | Head commit SHA for diff comparison | ✅ | - |
 | `jira-ticket-url-prefix` | JIRA ticket URL prefix | ❌ | `https://virdocs.atlassian.net/browse/` |
 
 ## Outputs
@@ -148,7 +140,7 @@ The action handles various error scenarios:
 - API rate limits and timeouts
 - Large diffs that exceed API limits
 - Network connectivity issues
-- Invalid PR numbers or SHAs
+- Invalid PR numbers
 
 ## Customization
 
@@ -182,6 +174,7 @@ The action handles various error scenarios:
 2. **Permission Denied**: Check that workflow has `pull-requests: write` permission
 3. **Large Diffs**: Very large changes might exceed API limits - consider smaller PRs
 4. **Rate Limits**: Gemini API has rate limits - add delays between calls if needed
+5. **Invalid PR Number**: Ensure the PR number is valid and accessible
 
 ### Debug Mode
 

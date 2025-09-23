@@ -10,12 +10,6 @@ inputs:
   pr-number:
     description: 'Pull request number'
     required: true
-  base-sha:
-    description: 'Base commit SHA for diff comparison'
-    required: true
-  head-sha:
-    description: 'Head commit SHA for diff comparison'
-    required: true
   jira-ticket-url-prefix:
     description: 'JIRA ticket URL prefix (e.g., https://company.atlassian.net/browse/)'
     required: false
@@ -42,11 +36,14 @@ runs:
         npm install
       working-directory: ${{ github.action_path }}
     
-    - name: Generate git diff
+    - name: Generate PR diff from GitHub
       shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR_NUMBER: ${{ inputs.pr-number }}
       run: |
-        git fetch origin ${{ inputs.base-sha }} --depth=1
-        git diff ${{ inputs.base-sha }}... > pr.diff
+        # Get the PR diff directly from GitHub using gh CLI
+        gh pr diff ${{ inputs.pr-number }} > pr.diff
         echo "Generated diff file with $(wc -l < pr.diff) lines"
     
     - name: Generate PR description
