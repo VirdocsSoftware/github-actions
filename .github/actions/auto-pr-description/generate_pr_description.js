@@ -76,6 +76,12 @@ A short description of the changes.
       process.exit(1);
     }
 
+    if (!json.candidates[0].content.parts || !json.candidates[0].content.parts[0] || !json.candidates[0].content.parts[0].text) {
+      console.error('Error: Invalid response structure from Gemini API - missing parts or text');
+      console.error(JSON.stringify(json, null, 2));
+      process.exit(1);
+    }
+
     const result = json.candidates[0].content.parts[0].text;
     process.stdout.write(result);
   } catch (error) {
