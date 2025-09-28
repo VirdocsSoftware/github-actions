@@ -1,0 +1,35 @@
+name: Version Notification Example
+
+on:
+  # This is a sample workflow that can be triggered manually
+  workflow_dispatch:
+    inputs:
+      message-type:
+        description: 'Type of Slack message to send (default, detailed, minimal, release)'
+        required: false
+        default: 'default'
+        type: choice
+        options:
+          - default
+          - detailed
+          - minimal
+          - release
+  # Uncomment below to run the workflow on push to main
+  # push:
+  #   branches:
+  #     - main
+
+jobs:
+  notify-slack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Send version notification to Slack
+        uses: ./.github/actions/slack-notify-version
+        with:
+          slack-webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+          message-type: ${{ github.event.inputs.message-type || 'default' }} 
