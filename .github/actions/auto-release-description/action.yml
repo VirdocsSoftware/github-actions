@@ -1,11 +1,11 @@
-name: Auto PR Description Generator
-description: Automatically generate pull request descriptions using AI based on git diff
+name: Auto Release Description Generator
+description: Automatically generate release descriptions using AI based on git diff
 inputs:
   gemini-api-key:
     description: 'The API key for the Gemini API'
     required: true
   github-token:
-    description: 'GitHub token for PR operations'
+    description: 'GitHub token for release operations'
     required: true
   pr-number:
     description: 'Pull request number'
@@ -20,10 +20,10 @@ inputs:
     default: 'package-lock.json,yarn.lock,pnpm-lock.yaml,composer.lock,Gemfile.lock,poetry.lock,Pipfile.lock'
 outputs:
   description:
-    description: 'The generated PR description'
+    description: 'The generated release description'
     value: ${{ steps.generate_description.outputs.description }}
   updated:
-    description: 'Whether the PR description was updated'
+    description: 'Whether the release description was updated'
     value: ${{ steps.update_pr.outputs.updated }}
 
 runs:
