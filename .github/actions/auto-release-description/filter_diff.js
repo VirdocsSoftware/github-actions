@@ -4,10 +4,10 @@ const fs = require('fs');
 
 /**
  * Filters out specified files from a git diff
- * Usage: node filter_diff.js <diff_file> <ignore_files_comma_separated>
+ * Usage: node filter_diff.js <diff_file> <ignore_files_comma_separated> [max_lines]
  */
 
-function filterDiff(diffContent, ignoreFiles) {
+function filterDiff(diffContent, ignoreFiles, maxLines = null) {
   if (!ignoreFiles || ignoreFiles.trim() === '') {
     return diffContent;
   }
@@ -55,15 +55,24 @@ function filterDiff(diffContent, ignoreFiles) {
     }
   }
 
-  return filteredLines.join('\n');
+  let result = filteredLines.join('\n');
+  
+  // Apply line limit if specified
+  if (maxLines && filteredLines.length > maxLines) {
+    const truncatedLines = filteredLines.slice(0, maxLines);
+    truncatedLines.push('', '# ... (diff truncated due to size limits) ...', '');
+    result = truncatedLines.join('\n');
+  }
+  
+  return result;
 }
 
 // Main execution
 if (require.main === module) {
-  const [, , diffFile, ignoreFiles] = process.argv;
+  const [, , diffFile, ignoreFiles, maxLines] = process.argv;
   
   if (!diffFile) {
-    console.error('Usage: filter_diff.js <diff_file> <ignore_files_comma_separated>');
+    console.error('Usage: filter_diff.js <diff_file> <ignore_files_comma_separated> [max_lines]');
     process.exit(1);
   }
 
@@ -74,7 +83,8 @@ if (require.main === module) {
 
   try {
     const diffContent = fs.readFileSync(diffFile, 'utf8');
-    const filteredDiff = filterDiff(diffContent, ignoreFiles || '');
+    const maxLinesInt = maxLines ? parseInt(maxLines, 10) : null;
+    const filteredDiff = filterDiff(diffContent, ignoreFiles || '', maxLinesInt);
     
     // Write filtered diff back to the same file
     fs.writeFileSync(diffFile, filteredDiff, 'utf8');
@@ -87,6 +97,9 @@ if (require.main === module) {
     console.error(`Filtered diff: removed ${removedLines} lines (${originalLines} -> ${filteredLines})`);
     if (ignoreFiles) {
       console.error(`Ignored files: ${ignoreFiles}`);
+    }
+    if (maxLinesInt && originalLines > maxLinesInt) {
+      console.error(`Applied line limit: ${maxLinesInt}`);
     }
   } catch (error) {
     console.error(`Error filtering diff: ${error.message}`);

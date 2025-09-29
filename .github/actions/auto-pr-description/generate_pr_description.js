@@ -22,22 +22,22 @@ const path = require('path');
   }
 
   // Create prompt for PR description generation
-  const promptTemplate = `You are an expert programmer who is tasked with writing a pull request description.
-You will be given the git diff of the changes and you must write a markdown pull request description.
-Do not include the git diff in the pull request description. Do not include any other text in the pull request description.
-The pull request description should follow the following format:
+  const promptTemplate = `Write a concise pull request description based on the git diff. Use this exact format:
 
 ## Description
-A short description of the changes.
+Brief summary of changes (1-2 sentences max).
 
 ## Changes
-- [ ] Change 1
-- [ ] Change 2
+- [ ] Key change 1
+- [ ] Key change 2
+- [ ] Key change 3 (max 5 items)
 
 ## Verification
-- [ ] Verification step 1
-- [ ] Verification step 2
-`;
+- [ ] Test step 1
+- [ ] Test step 2
+- [ ] Test step 3 (max 3 items)
+
+Keep it concise and focused on the most important changes.`;
 
   const diffContent = fs.readFileSync(diffFile, 'utf8');
   const combinedPrompt = `${promptTemplate}\n\nHere is the git diff:\n\n${diffContent}`;
@@ -56,7 +56,7 @@ A short description of the changes.
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 2048,
+          maxOutputTokens: 1024,
         }
       })
     });
@@ -70,8 +70,20 @@ A short description of the changes.
 
     const json = await response.json();
     
-    if (!json.candidates || !json.candidates[0] || !json.candidates[0].content) {
+    if (!json.candidates || !json.candidates[0]) {
       console.error('Error: Invalid response from Gemini API');
+      console.error(JSON.stringify(json, null, 2));
+      process.exit(1);
+    }
+
+    // Check if response was truncated due to max tokens
+    if (json.candidates[0].finishReason === 'MAX_TOKENS') {
+      console.error('Warning: Response was truncated due to token limit. Consider reducing diff size or using more specific ignore-files.');
+      // Continue processing the partial response
+    }
+
+    if (!json.candidates[0].content) {
+      console.error('Error: No content in API response');
       console.error(JSON.stringify(json, null, 2));
       process.exit(1);
     }
