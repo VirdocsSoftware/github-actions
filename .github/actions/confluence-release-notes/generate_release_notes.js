@@ -205,7 +205,7 @@ class GeminiClient {
     const command =
       'Categorize the following as either Improvement or Feature and output to json using schema \'{"categories":[{"ticket_id":"$key","category":"$category"}]}\'';
     const url =
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-8b:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=" +
       this.api_key;
     const body = JSON.stringify({
       contents: [
@@ -217,6 +217,9 @@ class GeminiClient {
           ],
         },
       ],
+      generationConfig: {
+        maxOutputTokens: 8192,
+      },
     });
     const response = await this.fetch(url, {
       method: "POST",

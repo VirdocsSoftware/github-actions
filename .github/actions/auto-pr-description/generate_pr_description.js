@@ -107,7 +107,7 @@ ${diffContent}`;
  * Call Gemini API with the given prompt
  */
 async function callGeminiAPI(prompt, apiKey) {
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -120,7 +120,7 @@ async function callGeminiAPI(prompt, apiKey) {
         temperature: 0.7,
         topK: 40,
         topP: 0.95,
-        maxOutputTokens: 2048,
+        maxOutputTokens: 8192,
       }
     })
   });
