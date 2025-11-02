@@ -16,6 +16,11 @@ function estimateTokens(text) {
   return Math.ceil(text.length / CHARS_PER_TOKEN);
 }
 
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /**
  * Split diff into chunks by file boundaries
  */
@@ -157,6 +162,10 @@ async function processChunks(chunks, apiKey) {
   
   for (let i = 0; i < Math.min(chunks.length, MAX_CHUNKS); i++) {
     const chunk = chunks[i];
+    if (i > 0) {
+      // sleep for 3 seconds
+      sleep(3 * 1000);
+    }
     console.error(`Processing chunk ${i + 1}/${Math.min(chunks.length, MAX_CHUNKS)} (${chunk.file || 'unknown file'})`);
     
     try {
