@@ -21,6 +21,27 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+
+function splitStringByTokens(str, maxTokens) {
+  const words = str.split(' ');
+  const result = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    if (estimateTokens(currentLine + word) <= maxTokens) {
+      currentLine += (currentLine ? ' ' : '') + word;
+    } else {
+      if (currentLine) result.push(currentLine);
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) result.push(currentLine);
+
+  return result;
+}
+
+
 /**
  * Split diff into chunks by file boundaries
  */
@@ -35,11 +56,22 @@ function chunkDiffByFiles(diffContent) {
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
       if (currentChunk && estimateTokens(currentChunk + '\n' + line) > MAX_TOKENS_PER_REQUEST) {
-        fileChunks.push({
-          content: currentChunk.trim(),
-          file: currentFile,
-          type: 'file-chunk'
-        });
+        if(estimateTokens(currentChunk) > MAX_TOKENS_PER_REQUEST) {
+          const split_chunk = splitStringByTokens(currentChunk, MAX_TOKENS_PER_REQUEST);
+          split_chunk.forEach((chunk) => {
+            fileChunks.push({
+              content: chunk.trim(),
+              file: currentFile,
+              type: 'file-chunk'
+            });
+          })
+        }else {
+          fileChunks.push({
+            content: currentChunk.trim(),
+            file: currentFile,
+            type: 'file-chunk'
+          });
+        }
         currentChunk = '';
       }
       
@@ -224,8 +256,6 @@ Create a unified description that captures the overall changes across all files.
     if (estimatedTokens > MAX_TOKENS_PER_REQUEST) {
       console.error('Large diff detected, using chunking strategy...');
       
-      // For extremely large diffs, first try to summarize
-      console.error('Extremely large diff detected, using summary approach...');
       const chunks = chunkDiffByFiles(diffContent);
       console.error(`Split diff into ${chunks.length} chunks`);
       if (chunks.length > MAX_CHUNKS) {
