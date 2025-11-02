@@ -46,7 +46,7 @@ function splitStringByTokens(str, maxTokens) {
  * Split diff into chunks by file boundaries
  */
 function chunkDiffByFiles(diffContent) {
-  console.log('chunkDiffByFiles');
+  console.error('chunkDiffByFiles');
   const fileChunks = [];
   const lines = diffContent.split('\n');
   let currentChunk = '';
@@ -54,7 +54,7 @@ function chunkDiffByFiles(diffContent) {
   
   for (const line of lines) {
     // Check if this is a new file header
-    console.log(`Line is estimated at ${estimateTokens(line)} tokens`);
+    console.error(`Line is estimated at ${estimateTokens(line)} tokens`);
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
       if (currentChunk && estimateTokens(currentChunk + '\n' + line) > MAX_TOKENS_PER_REQUEST) {
@@ -158,7 +158,7 @@ ${diffContent}`;
  * Call Gemini API with the given prompt
  */
 async function callGeminiAPI(prompt, apiKey) {
-  console.log(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
+  console.error(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
   return 'gemini'; /*
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
@@ -201,7 +201,7 @@ async function callGeminiAPI(prompt, apiKey) {
  * Process diff chunks and combine results
  */
 async function processChunks(chunks, apiKey) {
-  console.log('processchunks');
+  console.error('processchunks');
   if (chunks.length === 1) {
     // Single chunk, process normally
     return await callGeminiAPI(createPRPrompt(chunks[0].content), apiKey);
