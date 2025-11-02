@@ -46,6 +46,7 @@ function splitStringByTokens(str, maxTokens) {
  * Split diff into chunks by file boundaries
  */
 function chunkDiffByFiles(diffContent) {
+  console.log('chunkDiffByFiles');
   const fileChunks = [];
   const lines = diffContent.split('\n');
   let currentChunk = '';
@@ -198,6 +199,7 @@ async function callGeminiAPI(prompt, apiKey) {
  * Process diff chunks and combine results
  */
 async function processChunks(chunks, apiKey) {
+  console.log('processchunks');
   if (chunks.length === 1) {
     // Single chunk, process normally
     return await callGeminiAPI(createPRPrompt(chunks[0].content), apiKey);
