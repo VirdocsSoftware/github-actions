@@ -153,7 +153,6 @@ ${diffContent}`;
  */
 async function callGeminiAPI(prompt, apiKey) {
   console.error(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
-  return 'gemini'; /*
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -188,7 +187,6 @@ async function callGeminiAPI(prompt, apiKey) {
   }
 
   return json.candidates[0].content.parts[0].text;
-  */
 }
 
 /**
@@ -208,7 +206,7 @@ async function processChunks(chunks, apiKey) {
     const chunk = chunks[i];
     if (i > 0) {
       // sleep for 3 seconds
-      sleep(3 * 1000);
+      sleep(5 * 1000);
     }
     console.error(`Processing chunk ${i + 1}/${Math.min(chunks.length, MAX_CHUNKS)} (${chunk.file || 'unknown file'})`);
     
@@ -227,7 +225,7 @@ async function processChunks(chunks, apiKey) {
   if (chunkResults.length === 0) {
     throw new Error('Failed to process any chunks');
   }
-  sleep(3*1000);
+  sleep(5*1000);
   // Combine results from multiple chunks
   const combinedPrompt = `Combine these pull request descriptions into a single, coherent PR description. Use the same format:
 
