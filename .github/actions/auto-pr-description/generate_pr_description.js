@@ -53,6 +53,7 @@ function chunkDiffByFiles(diffContent) {
   
   for (const line of lines) {
     // Check if this is a new file header
+    console.log(`Line is estimated at ${estimateTokens(line)} tokens`);
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
       if (currentChunk && estimateTokens(currentChunk + '\n' + line) > MAX_TOKENS_PER_REQUEST) {
@@ -78,9 +79,21 @@ function chunkDiffByFiles(diffContent) {
       // Start new chunk
       currentChunk = line + '\n';
       
+      
       // Extract filename for reference
       if (line.startsWith('+++')) {
         currentFile = line.replace('+++ b/', '').replace('+++ a/', '');
+      }
+      if(estimateTokens(currentChunk) > MAX_TOKENS_PER_REQUEST){
+        const split_chunk = splitStringByTokens(currentChunk, MAX_TOKENS_PER_REQUEST);
+        currentChunk = split_chunk[split_chunk.length-1];
+        for(let i = 0; i < split_chunk.length -1;i++){
+          fileChunks.push({
+            content: split_chunk[i].trim(),
+            file: currentFile,
+            type: 'file-chunk'
+          });
+        }
       }
     } else {
       currentChunk += line + '\n';
