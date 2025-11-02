@@ -34,7 +34,7 @@ function chunkDiffByFiles(diffContent) {
     // Check if this is a new file header
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
-      if (currentChunk && estimateTokens(currentChunk) > MAX_CHARS_PER_CHUNK / 2) {
+      if (currentChunk && estimateTokens(currentChunk + '\n' + line) > MAX_TOKENS_PER_REQUEST) {
         fileChunks.push({
           content: currentChunk.trim(),
           file: currentFile,
