@@ -6,8 +6,8 @@ const path = require('path');
 // Configuration constants
 const MAX_TOKENS_PER_REQUEST = 100000; // Conservative limit for Gemini 2.5 Flash
 const CHARS_PER_TOKEN = 4; // Rough estimation
-const MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_REQUEST * CHARS_PER_TOKEN;
-const MAX_CHUNKS = 1; // Limit to prevent excessive API calls
+//const MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_REQUEST * CHARS_PER_TOKEN;
+const MAX_CHUNKS = 3; // Limit to prevent excessive API calls
 
 /**
  * Estimate token count for text (rough approximation)
@@ -183,7 +183,7 @@ async function processChunks(chunks, apiKey) {
   if (chunkResults.length === 0) {
     throw new Error('Failed to process any chunks');
   }
-
+  sleep(3*1000);
   // Combine results from multiple chunks
   const combinedPrompt = `Combine these pull request descriptions into a single, coherent PR description. Use the same format:
 
@@ -225,41 +225,13 @@ Create a unified description that captures the overall changes across all files.
       console.error('Large diff detected, using chunking strategy...');
       
       // For extremely large diffs, first try to summarize
-      if (estimatedTokens > MAX_TOKENS_PER_REQUEST * 5) {
-        console.error('Extremely large diff detected, using summary approach...');
-        const summaryPrompt = createSummaryPrompt(diffContent);
-        result = await callGeminiAPI(summaryPrompt, apiKey);
-        
-        // Create a simplified PR description based on the summary
-        const prPrompt = `Based on this summary of changes, create a pull request description using this format:
-
-## Description
-Brief summary of changes (1-2 sentences max).
-
-## Changes
-- [ ] Key change 1
-- [ ] Key change 2
-- [ ] Key change 3 (max 5 items)
-
-## Verification
-- [ ] Test step 1
-- [ ] Test step 2
-- [ ] Test step 3 (max 3 items)
-
-Summary: ${result}`;
-        
-        result = await callGeminiAPI(prPrompt, apiKey);
-      } else {
-        // Chunk the diff and process
-        const chunks = chunkDiffByFiles(diffContent);
-        console.error(`Split diff into ${chunks.length} chunks`);
-        
-        if (chunks.length > MAX_CHUNKS) {
-          console.error(`Warning: Too many chunks (${chunks.length}), processing first ${MAX_CHUNKS} chunks only`);
-        }
-        
-        result = await processChunks(chunks, apiKey);
+      console.error('Extremely large diff detected, using summary approach...');
+      const chunks = chunkDiffByFiles(diffContent);
+      console.error(`Split diff into ${chunks.length} chunks`);
+      if (chunks.length > MAX_CHUNKS) {
+        console.error(`Warning: Too many chunks (${chunks.length}), processing first ${MAX_CHUNKS} chunks only`);
       }
+      result = await processChunks(chunks, apiKey);
     } else {
       // Small diff, process normally
       result = await callGeminiAPI(createPRPrompt(diffContent), apiKey);
