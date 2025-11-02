@@ -23,6 +23,7 @@ function sleep(ms) {
 
 
 function splitStringByTokens(str, maxTokens) {
+  console.error('splitStringByTokens');
   const words = str.split(' ');
   const result = [];
   let currentLine = '';
@@ -51,30 +52,23 @@ function chunkDiffByFiles(diffContent) {
   const lines = diffContent.split('\n');
   let currentChunk = '';
   let currentFile = '';
+  let tokenCount = 0;
   
   for (const line of lines) {
     // Check if this is a new file header
     console.error(`Line is estimated at ${estimateTokens(line)} tokens`);
+    tokenCount += estimateTokens(line);
+    console.error(`Total tokens for this chunk is ${tokenCount}`);
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
-      if (currentChunk && estimateTokens(currentChunk + '\n' + line) > MAX_TOKENS_PER_REQUEST) {
-        if(estimateTokens(currentChunk) > MAX_TOKENS_PER_REQUEST) {
-          const split_chunk = splitStringByTokens(currentChunk, MAX_TOKENS_PER_REQUEST);
-          split_chunk.forEach((chunk) => {
-            fileChunks.push({
-              content: chunk.trim(),
-              file: currentFile,
-              type: 'file-chunk'
-            });
-          })
-        }else {
-          fileChunks.push({
-            content: currentChunk.trim(),
-            file: currentFile,
-            type: 'file-chunk'
-          });
-        }
+      if (currentChunk && tokenCount > MAX_TOKENS_PER_REQUEST) {
+        fileChunks.push({
+          content: currentChunk.trim(),
+          file: currentFile,
+          type: 'file-chunk'
+        });
         currentChunk = '';
+        tokenCount = 0;
       }
       
       // Start new chunk
@@ -85,7 +79,7 @@ function chunkDiffByFiles(diffContent) {
       if (line.startsWith('+++')) {
         currentFile = line.replace('+++ b/', '').replace('+++ a/', '');
       }
-      if(estimateTokens(currentChunk) > MAX_TOKENS_PER_REQUEST){
+      if(tokenCount > MAX_TOKENS_PER_REQUEST){
         const split_chunk = splitStringByTokens(currentChunk, MAX_TOKENS_PER_REQUEST);
         currentChunk = split_chunk[split_chunk.length-1];
         for(let i = 0; i < split_chunk.length -1;i++){
