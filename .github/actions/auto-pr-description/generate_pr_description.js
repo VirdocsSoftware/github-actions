@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Configuration constants
-const MAX_TOKENS_PER_REQUEST = 100000; // Conservative limit for Gemini 2.5 Flash
+const MAX_TOKENS_PER_REQUEST = 80000; // Conservative limit for Gemini 2.5 Flash
 const CHARS_PER_TOKEN = 4; // Rough estimation
 //const MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_REQUEST * CHARS_PER_TOKEN;
 const MAX_CHUNKS = 3; // Limit to prevent excessive API calls
@@ -56,9 +56,9 @@ function chunkDiffByFiles(diffContent) {
   
   for (const line of lines) {
     // Check if this is a new file header
-    console.error(`Line is estimated at ${estimateTokens(line)} tokens`);
+    //console.error(`Line is estimated at ${estimateTokens(line)} tokens`);
     tokenCount += estimateTokens(line);
-    console.error(`Total tokens for this chunk is ${tokenCount}`);
+    //console.error(`Total tokens for this chunk is ${tokenCount}`);
     if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
       // If we have content and it's getting large, save current chunk
       if (currentChunk && tokenCount > MAX_TOKENS_PER_REQUEST) {
