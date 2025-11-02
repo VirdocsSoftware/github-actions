@@ -159,6 +159,7 @@ ${diffContent}`;
  */
 async function callGeminiAPI(prompt, apiKey) {
   console.log(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
+  return 'gemini'; /*
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -193,6 +194,7 @@ async function callGeminiAPI(prompt, apiKey) {
   }
 
   return json.candidates[0].content.parts[0].text;
+  */
 }
 
 /**
