@@ -7,7 +7,7 @@ const path = require('path');
 const MAX_TOKENS_PER_REQUEST = 100000; // Conservative limit for Gemini 2.5 Flash
 const CHARS_PER_TOKEN = 4; // Rough estimation
 const MAX_CHARS_PER_CHUNK = MAX_TOKENS_PER_REQUEST * CHARS_PER_TOKEN;
-const MAX_CHUNKS = 10; // Limit to prevent excessive API calls
+const MAX_CHUNKS = 1; // Limit to prevent excessive API calls
 
 /**
  * Estimate token count for text (rough approximation)
