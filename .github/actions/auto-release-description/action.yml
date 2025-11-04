@@ -68,19 +68,40 @@ runs:
         JIRA_TICKET_URL_PREFIX: ${{ inputs.jira-ticket-url-prefix }}
       run: |
         # Generate description using AI (with chunking support for large diffs)
-        node ${{ github.action_path }}/generate_pr_description.js pr.diff > release_description.md
+        # The script writes description to stdout, errors to stderr
+        if ! node ${{ github.action_path }}/generate_pr_description.js pr.diff > release_description.md 2>generate_errors.log; then
+          echo "Error: Failed to generate release description" >&2
+          cat generate_errors.log >&2
+          exit 1
+        fi
         
         # Get existing PR body to preserve all content
-        gh pr view ${{ inputs.pr-number }} --json body --jq '.body' > pr_body.md
+        gh pr view ${{ inputs.pr-number }} --json body --jq '.body' > pr_body.md || {
+          echo "Error: Failed to get PR body" >&2
+          exit 1
+        }
         
         # Insert the generated description into the existing PR body
         # This preserves all existing content and uses comment tags for auto-generated section
-        node ${{ github.action_path }}/insert_release_description.js pr_body.md release_description.md > new_body.md
+        node ${{ github.action_path }}/insert_release_description.js pr_body.md release_description.md > new_body.md || {
+          echo "Error: Failed to insert release description" >&2
+          exit 1
+        }
         
         # Output the description for other steps to use
-        echo "description<<EOF" >> $GITHUB_OUTPUT
-        cat release_description.md >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        # Use a unique delimiter to avoid conflicts with content that might contain "EOF"
+        DELIMITER="GITHUB_OUTPUT_DESCRIPTION_$(date +%s)_$$"
+        {
+          echo "description<<${DELIMITER}"
+          # Ensure file exists and is readable
+          if [ -f release_description.md ] && [ -s release_description.md ]; then
+            cat release_description.md
+          else
+            echo "Error: release_description.md is missing or empty" >&2
+            echo "Error: release_description.md is missing or empty"
+          fi
+          echo "${DELIMITER}"
+        } >> $GITHUB_OUTPUT
     
     - name: Update PR description
       id: update_pr
