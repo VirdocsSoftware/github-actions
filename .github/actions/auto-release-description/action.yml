@@ -80,6 +80,8 @@ runs:
           printf '%s\n' "$DESCRIPTION" > pr_body.md
         fi
         
+        cat pr_body.md
+        
         # Add JIRA ticket link if found
         PR_TITLE=$(gh pr view ${{ inputs.pr-number }} --json title --jq '.title')
         TICKET_ID=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' || true)
