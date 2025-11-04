@@ -67,34 +67,47 @@ runs:
         PR_NUMBER: ${{ inputs.pr-number }}
         JIRA_TICKET_URL_PREFIX: ${{ inputs.jira-ticket-url-prefix }}
       run: |
-        # Generate description using AI
-        DESCRIPTION=$(node ${{ github.action_path }}/generate_pr_description.js pr.diff)
-        
-        # Get existing PR body to check for images
-        FIRST_LINE=$(gh pr view ${{ inputs.pr-number }} --json body --jq '.body' | head -n 1)
-        
-        # Preserve images if they exist at the beginning
-        if echo "$FIRST_LINE" | grep -qE '^(<img[^>]*>[[:space:]]*|!\[[^]]*\]\([^)]*\))$'; then
-          printf '%s\n\n%s\n' "$FIRST_LINE" "$DESCRIPTION" > pr_body.md
-        else
-          printf '%s\n' "$DESCRIPTION" > pr_body.md
+        # Generate description using AI (with chunking support for large diffs)
+        # The script writes description to stdout, errors to stderr
+        if ! node ${{ github.action_path }}/generate_pr_description.js pr.diff > release_description.md 2>generate_errors.log; then
+          echo "Error: Failed to generate release description" >&2
+          cat generate_errors.log >&2
+          exit 1
         fi
         
-        # Add JIRA ticket link if found
-        PR_TITLE=$(gh pr view ${{ inputs.pr-number }} --json title --jq '.title')
-        TICKET_ID=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' || true)
-        if [ -z "$TICKET_ID" ]; then
-          TICKET_ID=$(echo "$GITHUB_HEAD_REF" | grep -oE '[A-Z]+-[0-9]+' || true)
-        fi
-        if [ -n "$TICKET_ID" ]; then
-          TICKET_URL="${{ inputs.jira-ticket-url-prefix }}${TICKET_ID}"
-          printf '\n## Ticket\n%s\n' "$TICKET_URL" >> pr_body.md
-        fi
+        # Get existing PR body to preserve all content
+        gh pr view ${{ inputs.pr-number }} --json body --jq '.body' > pr_body.md || {
+          echo "Error: Failed to get PR body" >&2
+          exit 1
+        }
+        
+        # Insert the generated description into the existing PR body
+        # This preserves all existing content and uses comment tags for auto-generated section
+        node ${{ github.action_path }}/insert_release_description.js pr_body.md release_description.md > new_body.md || {
+          echo "Error: Failed to insert release description" >&2
+          exit 1
+        }
         
         # Output the description for other steps to use
-        echo "description<<EOF" >> $GITHUB_OUTPUT
-        cat pr_body.md >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+        # Use a unique delimiter to avoid conflicts with content that might contain "EOF"
+        # Generate delimiter once and ensure it's used consistently
+        DELIMITER="GITHUB_OUTPUT_DESCRIPTION_$(date +%s)_$$"
+        {
+          echo "description<<${DELIMITER}"
+          # Ensure file exists and is readable
+          if [ -f release_description.md ] && [ -s release_description.md ]; then
+            # Output the file content
+            cat release_description.md
+            # Always ensure newline before delimiter (GitHub Actions requirement)
+            # This handles cases where file doesn't end with newline
+            printf '\n'
+          else
+            echo "Error: release_description.md is missing or empty" >&2
+            echo "Error: release_description.md is missing or empty"
+          fi
+          # Closing delimiter must match exactly - use the same variable
+          echo "${DELIMITER}"
+        } >> $GITHUB_OUTPUT
     
     - name: Update PR description
       id: update_pr
@@ -103,6 +116,7 @@ runs:
         GH_TOKEN: ${{ inputs.github-token }}
         PR_NUMBER: ${{ inputs.pr-number }}
       run: |
-        gh pr edit ${{ inputs.pr-number }} --body-file pr_body.md
+        # Update PR with merged body (preserves all existing content)
+        gh pr edit ${{ inputs.pr-number }} --body-file new_body.md
         echo "updated=true" >> $GITHUB_OUTPUT
         echo "Successfully updated PR #${{ inputs.pr-number }} description"
