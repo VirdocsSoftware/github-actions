@@ -67,35 +67,19 @@ runs:
         PR_NUMBER: ${{ inputs.pr-number }}
         JIRA_TICKET_URL_PREFIX: ${{ inputs.jira-ticket-url-prefix }}
       run: |
-        # Generate description using AI
-        DESCRIPTION=$(node ${{ github.action_path }}/generate_pr_description.js pr.diff)
+        # Generate description using AI (with chunking support for large diffs)
+        node ${{ github.action_path }}/generate_pr_description.js pr.diff > release_description.md
         
-        # Get existing PR body to check for images
-        FIRST_LINE=$(gh pr view ${{ inputs.pr-number }} --json body --jq '.body' | head -n 1)
+        # Get existing PR body to preserve all content
+        gh pr view ${{ inputs.pr-number }} --json body --jq '.body' > pr_body.md
         
-        # Preserve images if they exist at the beginning
-        if echo "$FIRST_LINE" | grep -qE '^(<img[^>]*>[[:space:]]*|!\[[^]]*\]\([^)]*\))$'; then
-          printf '%s\n\n%s\n' "$FIRST_LINE" "$DESCRIPTION" > pr_body.md
-        else
-          printf '%s\n' "$DESCRIPTION" > pr_body.md
-        fi
-        
-        cat pr_body.md
-        
-        # Add JIRA ticket link if found
-        PR_TITLE=$(gh pr view ${{ inputs.pr-number }} --json title --jq '.title')
-        TICKET_ID=$(echo "$PR_TITLE" | grep -oE '[A-Z]+-[0-9]+' || true)
-        if [ -z "$TICKET_ID" ]; then
-          TICKET_ID=$(echo "$GITHUB_HEAD_REF" | grep -oE '[A-Z]+-[0-9]+' || true)
-        fi
-        if [ -n "$TICKET_ID" ]; then
-          TICKET_URL="${{ inputs.jira-ticket-url-prefix }}${TICKET_ID}"
-          printf '\n## Ticket\n%s\n' "$TICKET_URL" >> pr_body.md
-        fi
+        # Insert the generated description into the existing PR body
+        # This preserves all existing content and uses comment tags for auto-generated section
+        node ${{ github.action_path }}/insert_release_description.js pr_body.md release_description.md > new_body.md
         
         # Output the description for other steps to use
         echo "description<<EOF" >> $GITHUB_OUTPUT
-        cat pr_body.md >> $GITHUB_OUTPUT
+        cat release_description.md >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
     
     - name: Update PR description
@@ -105,6 +89,7 @@ runs:
         GH_TOKEN: ${{ inputs.github-token }}
         PR_NUMBER: ${{ inputs.pr-number }}
       run: |
-        gh pr edit ${{ inputs.pr-number }} --body-file pr_body.md
+        # Update PR with merged body (preserves all existing content)
+        gh pr edit ${{ inputs.pr-number }} --body-file new_body.md
         echo "updated=true" >> $GITHUB_OUTPUT
         echo "Successfully updated PR #${{ inputs.pr-number }} description"
