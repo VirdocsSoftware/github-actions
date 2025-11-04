@@ -90,16 +90,22 @@ runs:
         
         # Output the description for other steps to use
         # Use a unique delimiter to avoid conflicts with content that might contain "EOF"
+        # Generate delimiter once and ensure it's used consistently
         DELIMITER="GITHUB_OUTPUT_DESCRIPTION_$(date +%s)_$$"
         {
           echo "description<<${DELIMITER}"
           # Ensure file exists and is readable
           if [ -f release_description.md ] && [ -s release_description.md ]; then
+            # Output the file content
             cat release_description.md
+            # Always ensure newline before delimiter (GitHub Actions requirement)
+            # This handles cases where file doesn't end with newline
+            printf '\n'
           else
             echo "Error: release_description.md is missing or empty" >&2
             echo "Error: release_description.md is missing or empty"
           fi
+          # Closing delimiter must match exactly - use the same variable
           echo "${DELIMITER}"
         } >> $GITHUB_OUTPUT
     
