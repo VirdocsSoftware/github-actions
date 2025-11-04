@@ -52,46 +52,69 @@ function chunkDiffByFiles(diffContent) {
   const lines = diffContent.split('\n');
   let currentChunk = '';
   let currentFile = '';
-  let tokenCount = 0;
+  let currentChunkTokenCount = 0;
+  const PROMPT_OVERHEAD = 2000; // Reserve tokens for prompt overhead
+  const MAX_CHUNK_TOKENS = MAX_TOKENS_PER_REQUEST - PROMPT_OVERHEAD;
   
-  for (const line of lines) {
-    // Check if this is a new file header
-    //console.error(`Line is estimated at ${estimateTokens(line)} tokens`);
-    tokenCount += estimateTokens(line);
-    //console.error(`Total tokens for this chunk is ${tokenCount}`);
-    if (line.startsWith('diff --git') || line.startsWith('+++') || line.startsWith('---')) {
-      // If we have content and it's getting large, save current chunk
-      if (currentChunk && tokenCount > MAX_TOKENS_PER_REQUEST) {
-        fileChunks.push({
-          content: currentChunk.trim(),
-          file: currentFile,
-          type: 'file-chunk'
-        });
-        currentChunk = '';
-        tokenCount = 0;
-      }
-      
-      // Start new chunk
-      currentChunk = line + '\n';
-      
-      
-      // Extract filename for reference
-      if (line.startsWith('+++')) {
-        currentFile = line.replace('+++ b/', '').replace('+++ a/', '');
-      }
-      if(tokenCount > MAX_TOKENS_PER_REQUEST){
-        const split_chunk = splitStringByTokens(currentChunk, MAX_TOKENS_PER_REQUEST);
-        currentChunk = split_chunk[split_chunk.length-1];
-        for(let i = 0; i < split_chunk.length -1;i++){
-          fileChunks.push({
-            content: split_chunk[i].trim(),
-            file: currentFile,
-            type: 'file-chunk'
-          });
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lineTokens = estimateTokens(line);
+    const isNewFile = line.startsWith('diff --git');
+    const isFileHeader = line.startsWith('+++') || line.startsWith('---');
+    
+    // Check if we need to split current chunk before adding this line
+    if (currentChunk && (currentChunkTokenCount + lineTokens) > MAX_CHUNK_TOKENS) {
+      // Current chunk is getting too large, save it
+      fileChunks.push({
+        content: currentChunk.trim(),
+        file: currentFile,
+        type: 'file-chunk'
+      });
+      console.error(`Chunk ${fileChunks.length} saved: ${currentChunkTokenCount} tokens for ${currentFile || 'unknown'}`);
+      currentChunk = '';
+      currentChunkTokenCount = 0;
+    }
+    
+    // Handle new file boundaries
+    if (isNewFile) {
+      // Extract filename from next lines
+      // Look ahead for +++ line
+      for (let j = i + 1; j < Math.min(i + 10, lines.length); j++) {
+        if (lines[j].startsWith('+++')) {
+          currentFile = lines[j].replace('+++ b/', '').replace('+++ a/', '');
+          break;
         }
       }
-    } else {
-      currentChunk += line + '\n';
+    }
+    
+    // Add line to current chunk
+    currentChunk += line + '\n';
+    currentChunkTokenCount += lineTokens;
+    
+    // If a single line is too large, split it
+    if (lineTokens > MAX_CHUNK_TOKENS && currentChunk.length > 100) {
+      // Remove the line from current chunk
+      currentChunk = currentChunk.substring(0, currentChunk.length - line.length - 1);
+      currentChunkTokenCount -= lineTokens;
+      
+      // Split the large line
+      const splitChunks = splitStringByTokens(line, MAX_CHUNK_TOKENS);
+      for (let j = 0; j < splitChunks.length; j++) {
+        if (j > 0) {
+          // Save previous chunk if it has content
+          if (currentChunk.trim()) {
+            fileChunks.push({
+              content: currentChunk.trim(),
+              file: currentFile,
+              type: 'file-chunk'
+            });
+            currentChunk = '';
+            currentChunkTokenCount = 0;
+          }
+        }
+        currentChunk = splitChunks[j] + '\n';
+        currentChunkTokenCount = estimateTokens(currentChunk);
+      }
     }
   }
   
@@ -102,6 +125,7 @@ function chunkDiffByFiles(diffContent) {
       file: currentFile,
       type: 'file-chunk'
     });
+    console.error(`Final chunk ${fileChunks.length} saved: ${currentChunkTokenCount} tokens for ${currentFile || 'unknown'}`);
   }
   
   return fileChunks;
@@ -160,44 +184,67 @@ ${diffContent}`;
 }
 
 /**
- * Call Gemini API with the given prompt
+ * Call Gemini API with the given prompt (with retry logic for rate limits)
  */
-async function callGeminiAPI(prompt, apiKey) {
-  console.error(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: prompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      }
-    })
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`Gemini API request failed with status ${response.status}: ${errorText}`);
-  }
-
-  const json = await response.json();
+async function callGeminiAPI(prompt, apiKey, retryCount = 0) {
+  const maxRetries = 3;
+  const baseDelay = 1000; // 1 second base delay
   
-  if (!json.candidates || !json.candidates[0]) {
-    throw new Error('Invalid response from Gemini API');
-  }
+  console.error(`Sending prompt with an estimated ${estimateTokens(prompt)} tokens`);
+  
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 8192,
+        }
+      })
+    });
 
-  if (!json.candidates[0].content || !json.candidates[0].content.parts || !json.candidates[0].content.parts[0] || !json.candidates[0].content.parts[0].text) {
-    throw new Error('Invalid response structure from Gemini API - missing content');
-  }
+    // Handle rate limiting (429) with exponential backoff
+    if (response.status === 429 && retryCount < maxRetries) {
+      const delay = baseDelay * Math.pow(2, retryCount); // Exponential backoff: 1s, 2s, 4s
+      console.error(`Rate limit hit, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+      await sleep(delay);
+      return await callGeminiAPI(prompt, apiKey, retryCount + 1);
+    }
 
-  return json.candidates[0].content.parts[0].text;
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API request failed with status ${response.status}: ${errorText}`);
+    }
+
+    const json = await response.json();
+    
+    if (!json.candidates || !json.candidates[0]) {
+      throw new Error('Invalid response from Gemini API');
+    }
+
+    if (!json.candidates[0].content || !json.candidates[0].content.parts || !json.candidates[0].content.parts[0] || !json.candidates[0].content.parts[0].text) {
+      throw new Error('Invalid response structure from Gemini API - missing content');
+    }
+
+    return json.candidates[0].content.parts[0].text;
+  } catch (error) {
+    // If it's a network error and we have retries left, retry with exponential backoff
+    if (retryCount < maxRetries && (error.message.includes('fetch') || error.message.includes('network'))) {
+      const delay = baseDelay * Math.pow(2, retryCount);
+      console.error(`Network error, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries}): ${error.message}`);
+      await sleep(delay);
+      return await callGeminiAPI(prompt, apiKey, retryCount + 1);
+    }
+    throw error;
+  }
 }
 
 /**
@@ -212,12 +259,13 @@ async function processChunks(chunks, apiKey) {
 
   // Multiple chunks - process each and combine
   const chunkResults = [];
+  const CHUNK_DELAY = 500; // 500ms delay between chunks (reduced from 5s)
   
   for (let i = 0; i < Math.min(chunks.length, MAX_CHUNKS); i++) {
     const chunk = chunks[i];
     if (i > 0) {
-      // sleep for 3 seconds
-      sleep(5 * 1000);
+      // Small delay between chunks to avoid rate limits (reduced from 5s to 500ms)
+      await sleep(CHUNK_DELAY);
     }
     console.error(`Processing chunk ${i + 1}/${Math.min(chunks.length, MAX_CHUNKS)} (${chunk.file || 'unknown file'})`);
     
@@ -236,7 +284,10 @@ async function processChunks(chunks, apiKey) {
   if (chunkResults.length === 0) {
     throw new Error('Failed to process any chunks');
   }
-  sleep(5*1000);
+  
+  // Small delay before combining (reduced from 5s to 500ms)
+  await sleep(CHUNK_DELAY);
+  
   // Combine results from multiple chunks
   const combinedPrompt = `Combine these pull request descriptions into a single, coherent PR description. Use the same format:
 
