@@ -150,19 +150,19 @@ ${diffContent}`;
  * Create the main PR description prompt
  */
 function createPRPrompt(diffContent) {
-  return `Write a release note summary with the following sections:
+  return `Write a release note summary with the following sections. Be comprehensive but concise - focus on the most important changes:
 
   ## Infrastructure Changes
-  Highlight changes to AWS resources, IaC (CloudFormation/SAM templates), Lambda functions, databases, and deployment configurations.
+  Highlight changes to AWS resources, IaC (CloudFormation/SAM templates), Lambda functions, databases, and deployment configurations. Use bullet points for clarity.
 
   ## Security Concerns
-  Identify any security-related changes, authentication/authorization updates, data access modifications, or potential vulnerabilities.
+  Identify any security-related changes, authentication/authorization updates, data access modifications, or potential vulnerabilities. If none, state "No significant security changes detected."
 
   ## Performance Implications
-  Assess any changes that could impact system performance, database queries, API response times, or resource consumption.
+  Assess any changes that could impact system performance, database queries, API response times, or resource consumption. If none, state "No significant performance implications detected."
 
   ## New Features
-  Describe new functionality, enhancements, or capabilities being introduced.
+  Describe new functionality, enhancements, or capabilities being introduced. Use bullet points for multiple features.
 
   ## Student Access Risk Analysis
   Evaluate the risk that these changes could cause students to lose access to their course materials. Assess changes to:
@@ -177,6 +177,8 @@ function createPRPrompt(diffContent) {
   For each risk identified, provide: Risk Level (NONE/LOW/MEDIUM/HIGH/CRITICAL), specific changes, risk description, and recommended verification steps.
 
   If no student access risks are detected, state: "Risk Level: NONE - No changes affect student material access."
+
+  IMPORTANT: Keep the total response under 12,000 tokens. Be comprehensive but concise. Group similar changes together.
 
   Print only the report and ask no questions.
 
@@ -206,7 +208,7 @@ async function callGeminiAPI(prompt, apiKey, retryCount = 0) {
           temperature: 0.7,
           topK: 40,
           topP: 0.95,
-          maxOutputTokens: 8192,
+          maxOutputTokens: 16384,
         }
       })
     });
